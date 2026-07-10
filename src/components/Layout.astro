@@ -1,10 +1,10 @@
 ---
 import "../styles/global.css";
 import site from "../data/site.json";
+import { withBase } from "../lib/paths";
 
 const { title = site.title, description = site.subtitle } = Astro.props;
 const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`;
-const base = import.meta.env.BASE_URL;
 ---
 
 <!doctype html>
@@ -14,25 +14,25 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#fff8fb" />
-    <link rel="icon" href={`${base}images/avatar.svg`} />
+    <link rel="icon" href={withBase("images/avatar.svg")} />
     <title>{pageTitle}</title>
   </head>
   <body>
     <div class="reading-progress" data-reading-progress></div>
     <div class="site-shell">
       <header class="topbar">
-        <a class="brand" href={base} aria-label="返回首页">
+        <a class="brand" href={withBase()} aria-label="返回首页">
           <span class="brand-mark">水</span>
           <span>{site.title}</span>
         </a>
         <nav class="nav" aria-label="主导航">
-          <a href={base}>首页</a>
-          <a href={`${base}posts/`}>文章</a>
-          <a href={`${base}archive/`}>归档</a>
-          <a href={`${base}projects/`}>作品</a>
-          <a href={`${base}music/`}>音乐</a>
-          <a href={`${base}friends/`}>友链</a>
-          <a href={`${base}about/`}>关于</a>
+          <a href={withBase()}>首页</a>
+          <a href={withBase("posts/")}>文章</a>
+          <a href={withBase("archive/")}>归档</a>
+          <a href={withBase("projects/")}>作品</a>
+          <a href={withBase("music/")}>音乐</a>
+          <a href={withBase("friends/")}>友链</a>
+          <a href={withBase("about/")}>关于</a>
           <button class="icon-button" type="button" data-theme-toggle aria-label="切换深浅色">◐</button>
         </nav>
       </header>

@@ -1,9 +1,10 @@
 ---
+import { withBase } from "../lib/paths";
+
 const { post, large = false } = Astro.props;
-const base = import.meta.env.BASE_URL;
-const url = `${base}posts/${post.slug}/`;
+const url = withBase(`posts/${post.slug}/`);
 const data = post.data;
-const cover = data.cover || `${base}images/covers/spring-river.svg`;
+const cover = data.cover || withBase("images/covers/spring-river.svg");
 const haystack = [data.title, data.description, data.category, ...(data.tags || [])].join(" ");
 ---
 

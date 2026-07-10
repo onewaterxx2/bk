@@ -1,7 +1,8 @@
 ---
+import { withBase } from "../lib/paths";
+
 const { project } = Astro.props;
-const base = import.meta.env.BASE_URL;
-const cover = project.data.cover || `${base}images/covers/admin-tool.svg`;
+const cover = project.data.cover || withBase("images/covers/admin-tool.svg");
 ---
 
 <article class="card reveal">

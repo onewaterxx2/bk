@@ -1,6 +1,7 @@
 ---
 import Layout from "../../components/Layout.astro";
 import { getPublishedPosts } from "../../lib/content";
+import { withBase } from "../../lib/paths";
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -24,7 +25,7 @@ const data = post.data;
       <p class="hero-copy">{data.description}</p>
       {data.cover && <img class="article-cover" src={data.cover} alt="" />}
       <div class="tag-list">
-        {data.tags.map((tag) => <a href={`${import.meta.env.BASE_URL}tags/${encodeURIComponent(tag)}/`}>#{tag}</a>)}
+        {data.tags.map((tag) => <a href={withBase(`tags/${encodeURIComponent(tag)}/`)}>#{tag}</a>)}
       </div>
       <div class="prose">
         <Content />
