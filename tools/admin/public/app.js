@@ -45,6 +45,15 @@ const setProgress = (percent, label) => {
   $("#progress-label").textContent = label;
 };
 
+const activateTab = (tab) => {
+  const button = document.querySelector(`nav button[data-tab="${tab}"]`);
+  if (!button) return;
+  document.querySelectorAll("nav button").forEach((item) => item.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach((panel) => panel.classList.remove("active"));
+  button.classList.add("active");
+  document.getElementById(tab).classList.add("active");
+};
+
 const markStep = (index) => {
   document.querySelectorAll("#publish-steps li").forEach((item, itemIndex) => {
     item.classList.toggle("active", itemIndex === index);
@@ -53,12 +62,7 @@ const markStep = (index) => {
 };
 
 document.querySelectorAll("nav button").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll("nav button").forEach((item) => item.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach((panel) => panel.classList.remove("active"));
-    button.classList.add("active");
-    document.getElementById(button.dataset.tab).classList.add("active");
-  });
+  button.addEventListener("click", () => activateTab(button.dataset.tab));
 });
 
 const friendRow = (friend = {}) => {
@@ -122,39 +126,67 @@ const load = async () => {
 $("#add-friend").addEventListener("click", () => $("#friend-list").append(friendRow()));
 $("#add-music").addEventListener("click", () => $("#music-list").append(musicRow()));
 
-$("#save-post").addEventListener("click", async () => {
-  const body = {
-    title: $("#post-title").value,
-    slug: $("#post-slug").value,
-    category: $("#post-category").value,
-    tags: $("#post-tags").value,
-    pubDate: $("#post-date").value,
-    readingTime: $("#post-reading").value,
-    description: $("#post-description").value,
-    coverData: await fileToDataUrl($("#post-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
-    featured: $("#post-featured").checked,
-    draft: $("#post-draft").checked,
-    content: $("#post-content").value
-  };
-  const result = await request("/api/posts", body);
-  alert(`文章已保存：${result.slug}`);
+const buildPostBody = async () => ({
+  title: $("#post-title").value,
+  slug: $("#post-slug").value,
+  category: $("#post-category").value,
+  tags: $("#post-tags").value,
+  pubDate: $("#post-date").value,
+  readingTime: $("#post-reading").value,
+  description: $("#post-description").value,
+  coverData: await fileToDataUrl($("#post-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
+  featured: $("#post-featured").checked,
+  draft: $("#post-draft").checked,
+  content: $("#post-content").value
 });
 
+const savePost = async () => {
+  setProgress(12, "正在保存文章到本地");
+  const result = await request("/api/posts", await buildPostBody());
+  setProgress(24, `文章已保存：${result.slug}`);
+  return result;
+};
+
+$("#save-post").addEventListener("click", async () => {
+  const result = await savePost();
+  alert(`文章已保存到本地：${result.slug}\n如需上传到 GitHub，请点击“保存并发布”或到“发布”页点击发布。`);
+});
+
+$("#save-post-publish").addEventListener("click", async () => {
+  activateTab("publish");
+  await savePost();
+  await publishNow();
+});
+
+const buildProjectBody = async () => ({
+  title: $("#project-title").value,
+  slug: $("#project-slug").value,
+  tags: $("#project-tags").value,
+  pubDate: $("#project-date").value,
+  link: $("#project-link").value,
+  repo: $("#project-repo").value,
+  description: $("#project-description").value,
+  coverData: await fileToDataUrl($("#project-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
+  featured: $("#project-featured").checked,
+  content: $("#project-content").value
+});
+
+const saveProject = async () => {
+  setProgress(12, "正在保存作品到本地");
+  const result = await request("/api/projects", await buildProjectBody());
+  setProgress(24, `作品已保存：${result.slug}`);
+  return result;
+};
+
 $("#save-project").addEventListener("click", async () => {
-  const body = {
-    title: $("#project-title").value,
-    slug: $("#project-slug").value,
-    tags: $("#project-tags").value,
-    pubDate: $("#project-date").value,
-    link: $("#project-link").value,
-    repo: $("#project-repo").value,
-    description: $("#project-description").value,
-    coverData: await fileToDataUrl($("#project-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
-    featured: $("#project-featured").checked,
-    content: $("#project-content").value
-  };
-  const result = await request("/api/projects", body);
-  alert(`作品已保存：${result.slug}`);
+  const result = await saveProject();
+  alert(`作品已保存到本地：${result.slug}\n如需上传到 GitHub，请点击“保存并发布”或到“发布”页点击发布。`);
+});
+
+$("#save-project-publish").addEventListener("click", async () => {
+  activateTab("publish");
+  await saveProject();
+  await publishNow();
 });
 
 $("#save-friends").addEventListener("click", async () => {
@@ -184,7 +216,7 @@ $("#save-site").addEventListener("click", async () => {
   alert("站点资料已保存");
 });
 
-$("#publish-btn").addEventListener("click", async () => {
+const publishNow = async () => {
   const button = $("#publish-btn");
   let timer;
   button.disabled = true;
@@ -223,6 +255,8 @@ $("#publish-btn").addEventListener("click", async () => {
     if (timer) clearInterval(timer);
     button.disabled = false;
   }
-});
+};
+
+$("#publish-btn").addEventListener("click", publishNow);
 
 load().catch((error) => alert(error.message));

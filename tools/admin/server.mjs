@@ -123,6 +123,7 @@ const publish = async (message) => {
   const upstream = await runGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
   const commands = [];
 
+  commands.push(["add", "."], ["commit", "-m", message || "publish blog update"]);
   if (head.code === 0 && upstream.code === 0) {
     commands.push(["pull", "--rebase"]);
   } else if (head.code === 0) {
@@ -130,8 +131,6 @@ const publish = async (message) => {
   } else {
     steps.push("No commits yet; skipping pull before initial commit.");
   }
-
-  commands.push(["add", "."], ["commit", "-m", message || "publish blog update"]);
   commands.push(upstream.code === 0 ? ["push"] : ["push", "-u", "origin", branch]);
 
   for (const args of commands) {

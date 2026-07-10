@@ -40,7 +40,11 @@
           <label class="check"><input id="post-draft" type="checkbox" /> 草稿</label>
           <label class="wide">正文<textarea id="post-content" rows="18" placeholder="使用 Markdown 写正文"></textarea></label>
         </div>
-        <button class="primary" id="save-post">保存文章</button>
+        <p class="hint">保存只会写入本地文件；要同步到 GitHub，请使用“保存并发布”或到“发布”页点击发布。</p>
+        <div class="button-row">
+          <button id="save-post">保存到本地</button>
+          <button class="primary" id="save-post-publish">保存并发布</button>
+        </div>
       </section>
 
       <section class="panel" id="project">
@@ -60,7 +64,11 @@
           <label class="check"><input id="project-featured" type="checkbox" /> 首页推荐</label>
           <label class="wide">详情<textarea id="project-content" rows="10"></textarea></label>
         </div>
-        <button class="primary" id="save-project">保存作品</button>
+        <p class="hint">保存只会写入本地文件；要同步到 GitHub，请使用“保存并发布”或到“发布”页点击发布。</p>
+        <div class="button-row">
+          <button id="save-project">保存到本地</button>
+          <button class="primary" id="save-project-publish">保存并发布</button>
+        </div>
       </section>
 
       <section class="panel" id="music">
