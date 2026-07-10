@@ -1,0 +1,22 @@
+---
+import Layout from "../components/Layout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import { getProjects } from "../lib/content";
+
+const projects = await getProjects();
+---
+
+<Layout title="作品" description="江水博客的作品集">
+  <main class="section">
+    <div class="section-title">
+      <div>
+        <span class="kicker">Portfolio</span>
+        <h2>作品</h2>
+      </div>
+      <p>项目、工具、实验和可以公开展示的阶段性成果。</p>
+    </div>
+    <div class="grid two">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </main>
+</Layout>

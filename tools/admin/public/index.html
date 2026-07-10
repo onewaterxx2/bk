@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>江水博客管理工具</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="logo">水</div>
+      <h1>江水管理台</h1>
+      <p>本地写作、资源管理、GitHub 发布。</p>
+      <nav>
+        <button class="active" data-tab="post">文章</button>
+        <button data-tab="project">作品</button>
+        <button data-tab="music">音乐</button>
+        <button data-tab="friends">友链</button>
+        <button data-tab="site">站点</button>
+        <button data-tab="publish">发布</button>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="panel active" id="post">
+        <header>
+          <span>Writing</span>
+          <h2>新建文章</h2>
+        </header>
+        <div class="form-grid">
+          <label>标题<input id="post-title" /></label>
+          <label>Slug<input id="post-slug" placeholder="留空自动生成" /></label>
+          <label>分类<input id="post-category" value="随笔" /></label>
+          <label>标签<input id="post-tags" placeholder="用英文逗号分隔" /></label>
+          <label>日期<input id="post-date" type="date" /></label>
+          <label>阅读时间<input id="post-reading" placeholder="3 min" /></label>
+          <label class="wide">摘要<textarea id="post-description" rows="3"></textarea></label>
+          <label>封面图<input id="post-cover" type="file" accept="image/*" /></label>
+          <label class="check"><input id="post-featured" type="checkbox" /> 首页推荐</label>
+          <label class="check"><input id="post-draft" type="checkbox" /> 草稿</label>
+          <label class="wide">正文<textarea id="post-content" rows="18" placeholder="使用 Markdown 写正文"></textarea></label>
+        </div>
+        <button class="primary" id="save-post">保存文章</button>
+      </section>
+
+      <section class="panel" id="project">
+        <header>
+          <span>Portfolio</span>
+          <h2>新建作品</h2>
+        </header>
+        <div class="form-grid">
+          <label>标题<input id="project-title" /></label>
+          <label>Slug<input id="project-slug" /></label>
+          <label>标签<input id="project-tags" /></label>
+          <label>日期<input id="project-date" type="date" /></label>
+          <label>访问链接<input id="project-link" /></label>
+          <label>源码链接<input id="project-repo" /></label>
+          <label class="wide">摘要<textarea id="project-description" rows="3"></textarea></label>
+          <label>封面图<input id="project-cover" type="file" accept="image/*" /></label>
+          <label class="check"><input id="project-featured" type="checkbox" /> 首页推荐</label>
+          <label class="wide">详情<textarea id="project-content" rows="10"></textarea></label>
+        </div>
+        <button class="primary" id="save-project">保存作品</button>
+      </section>
+
+      <section class="panel" id="music">
+        <header>
+          <span>Playlist</span>
+          <h2>音乐管理</h2>
+        </header>
+        <div id="music-list"></div>
+        <button id="add-music">添加一首</button>
+        <button class="primary" id="save-music">保存音乐</button>
+      </section>
+
+      <section class="panel" id="friends">
+        <header>
+          <span>Links</span>
+          <h2>友链管理</h2>
+        </header>
+        <div id="friend-list"></div>
+        <button id="add-friend">添加友链</button>
+        <button class="primary" id="save-friends">保存友链</button>
+      </section>
+
+      <section class="panel" id="site">
+        <header>
+          <span>Profile</span>
+          <h2>站点资料</h2>
+        </header>
+        <div class="form-grid">
+          <label>站点名<input id="site-title" /></label>
+          <label>昵称<input id="site-nickname" /></label>
+          <label>位置<input id="site-location" /></label>
+          <label>GitHub<input id="site-github" /></label>
+          <label class="wide">副标题<textarea id="site-subtitle" rows="2"></textarea></label>
+          <label class="wide">简介<textarea id="site-bio" rows="4"></textarea></label>
+        </div>
+        <button class="primary" id="save-site">保存资料</button>
+      </section>
+
+      <section class="panel" id="publish">
+        <header>
+          <span>Deploy</span>
+          <h2>发布到 GitHub</h2>
+        </header>
+        <p class="hint">发布会依次执行 git pull --rebase、git add .、git commit、git push。</p>
+        <label>提交说明<input id="commit-message" value="publish blog update" /></label>
+        <button class="primary" id="publish-btn">发布</button>
+        <pre id="output"></pre>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+---
+import Layout from "../components/Layout.astro";
+import MusicCard from "../components/MusicCard.astro";
+import music from "../data/music.json";
+---
+
+<Layout title="音乐" description="江水博客的音乐收藏">
+  <main class="section">
+    <div class="section-title">
+      <div>
+        <span class="kicker">Music</span>
+        <h2>音乐</h2>
+      </div>
+      <p>之后可以通过本地管理工具上传音乐文件并更新这里的播放列表。</p>
+    </div>
+    <div class="grid two">
+      {music.map((track) => <MusicCard track={track} />)}
+    </div>
+  </main>
+</Layout>

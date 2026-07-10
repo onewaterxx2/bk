@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Astro">
+  <rect width="120" height="120" rx="34" fill="#181826"/>
+  <path d="M60 19c13 24 24 49 33 77-15-9-31-13-48-12-9 0-17 2-25 5 10-25 23-48 40-70z" fill="#fff"/>
+  <path d="M43 87c10 9 23 13 38 12-10 10-24 13-38 8-8-3-13-8-16-15 5-3 10-5 16-5z" fill="#ff5d01"/>
+</svg>

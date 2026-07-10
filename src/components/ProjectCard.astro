@@ -1,0 +1,24 @@
+---
+const { project } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const cover = project.data.cover || `${base}images/covers/admin-tool.svg`;
+---
+
+<article class="card reveal">
+  <img class="card-cover" src={cover} alt="" loading="lazy" />
+  <div class="card-body">
+    <div class="meta">
+      <span class="pill">Project</span>
+      <time datetime={project.data.pubDate.toISOString()}>{project.data.pubDate.toLocaleDateString("zh-CN")}</time>
+    </div>
+    <h3>{project.data.title}</h3>
+    <p>{project.data.description}</p>
+    <div class="tag-list">
+      {project.data.tags.map((tag: string) => <span>#{tag}</span>)}
+    </div>
+    <div class="hero-actions">
+      {project.data.link && <a class="button" href={project.data.link} target="_blank" rel="noreferrer">访问</a>}
+      {project.data.repo && <a class="button" href={project.data.repo} target="_blank" rel="noreferrer">源码</a>}
+    </div>
+  </div>
+</article>

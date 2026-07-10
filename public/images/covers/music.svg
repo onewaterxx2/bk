@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="音乐封面">
+  <defs>
+    <radialGradient id="r" cx=".42" cy=".35" r=".68">
+      <stop stop-color="#fff8bd"/>
+      <stop offset=".42" stop-color="#c8f0ff"/>
+      <stop offset=".74" stop-color="#ffd3e4"/>
+      <stop offset="1" stop-color="#8b91ff"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" rx="140" fill="url(#r)"/>
+  <circle cx="300" cy="300" r="126" fill="#fff" opacity=".52"/>
+  <circle cx="300" cy="300" r="34" fill="#6874ff"/>
+  <path d="M374 168v202c0 42-34 76-76 76s-76-34-76-76 34-76 76-76c17 0 32 5 45 14V168z" fill="#2d3352" opacity=".76"/>
+</svg>

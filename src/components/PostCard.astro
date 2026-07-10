@@ -1,0 +1,26 @@
+---
+const { post, large = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const url = `${base}posts/${post.slug}/`;
+const data = post.data;
+const cover = data.cover || `${base}images/covers/spring-river.svg`;
+const haystack = [data.title, data.description, data.category, ...(data.tags || [])].join(" ");
+---
+
+<article class={`card reveal ${large ? "large-card" : ""}`} data-search-card={haystack}>
+  <a href={url} aria-label={`阅读 ${data.title}`}>
+    <img class="card-cover" src={cover} alt="" loading="lazy" />
+    <div class="card-body">
+      <div class="meta">
+        <span class="pill">{data.category}</span>
+        <time datetime={data.pubDate.toISOString()}>{data.pubDate.toLocaleDateString("zh-CN")}</time>
+        {data.readingTime && <span>{data.readingTime}</span>}
+      </div>
+      <h3>{data.title}</h3>
+      <p>{data.description}</p>
+      <div class="tag-list">
+        {data.tags?.map((tag: string) => <span>#{tag}</span>)}
+      </div>
+    </div>
+  </a>
+</article>

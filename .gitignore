@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.netlify/
+.env
+.env.*
+.npm-cache/
+模版.png
+npm-debug.log*
+*.log
+pnpm-lock.yaml
+yarn.lock

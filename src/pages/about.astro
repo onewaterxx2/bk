@@ -1,0 +1,28 @@
+---
+import Layout from "../components/Layout.astro";
+import site from "../data/site.json";
+---
+
+<Layout title="关于" description="关于江水博客">
+  <main class="article-shell">
+    <article class="article glass">
+      <span class="kicker">About</span>
+      <h1>关于 {site.title}</h1>
+      <p class="hero-copy">{site.bio}</p>
+      <div class="prose">
+        <h2>这里会记录什么</h2>
+        <p>这是一个混合型个人博客，不限制内容方向。技术、生活、学习、作品、音乐、图片和一些短记录都可以放进来。</p>
+        <h2>如何更新</h2>
+        <p>内容由本地管理工具维护。写完内容后，工具会把文件提交到 GitHub 仓库，再由 GitHub Pages 自动发布。</p>
+        <h2>联系</h2>
+        <p>GitHub：<a href={site.github} target="_blank" rel="noreferrer">{site.github}</a></p>
+      </div>
+    </article>
+    <aside class="toc glass">
+      <strong>站点资料</strong>
+      <a>位置：{site.location}</a>
+      <a>语言：中文为主</a>
+      <a>风格：日系清爽</a>
+    </aside>
+  </main>
+</Layout>

@@ -1,0 +1,85 @@
+---
+import Layout from "../components/Layout.astro";
+import PostCard from "../components/PostCard.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import MusicCard from "../components/MusicCard.astro";
+import site from "../data/site.json";
+import music from "../data/music.json";
+import { getProjects, getPublishedPosts, uniqueCategories, uniqueTags } from "../lib/content";
+
+const posts = await getPublishedPosts();
+const projects = await getProjects();
+const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 4);
+const featuredProjects = projects.filter((project) => project.data.featured).slice(0, 2);
+const categories = uniqueCategories(posts);
+const tags = uniqueTags(posts);
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title={site.title} description={site.subtitle}>
+  <main>
+    <section class="hero">
+      <div class="hero-art" aria-hidden="true">
+        <img src={`${base}images/covers/spring-river.svg`} alt="" />
+      </div>
+      <div class="reveal">
+        <span class="kicker">Jiangshui Journal</span>
+        <h1>清澈地记录，认真地生活。</h1>
+        <p class="hero-copy">{site.subtitle}</p>
+        <div class="hero-actions">
+          <a class="button primary" href={`${base}posts/`}>阅读文章</a>
+          <a class="button" href={`${base}projects/`}>看作品</a>
+        </div>
+      </div>
+      <aside>
+        <section class="profile-card glass">
+          <div class="profile-head">
+            <img src={site.avatar} alt="" />
+            <div>
+              <h2>{site.nickname}</h2>
+              <p>{site.bio}</p>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>{posts.length}</strong><span>文章</span></div>
+            <div class="stat"><strong>{categories.length}</strong><span>分类</span></div>
+            <div class="stat"><strong>{tags.length}</strong><span>标签</span></div>
+          </div>
+        </section>
+        <MusicCard track={music[0]} />
+      </aside>
+    </section>
+
+    <div class="ticker">
+      <span>Latest</span>
+      <strong>{posts[0]?.data.title ?? "正在整理第一篇文章"} · {site.subtitle}</strong>
+    </div>
+
+    <section class="section">
+      <input class="searchbox" type="search" placeholder="搜索标题、摘要或标签..." data-search />
+      <div class="section-title">
+        <div>
+          <span class="kicker">Writing</span>
+          <h2>最近文章</h2>
+        </div>
+        <p>混合型内容流，技术、生活、作品复盘和灵感碎片都可以自然地放在这里。</p>
+      </div>
+      <div class="grid">
+        {featuredPosts.map((post) => <PostCard post={post} />)}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <div>
+          <span class="kicker">Projects</span>
+          <h2>作品与工具</h2>
+        </div>
+        <p>把能公开展示的项目、工具和阶段性成果集中在这里。</p>
+      </div>
+      <div class="grid two">
+        {featuredProjects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+  </main>
+</Layout>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="春日河面插画">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#fff5fb"/>
+      <stop offset=".45" stop-color="#dff4ff"/>
+      <stop offset="1" stop-color="#fff6d6"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" x2="1">
+      <stop stop-color="#9fd6ff"/>
+      <stop offset=".55" stop-color="#d8c6ff"/>
+      <stop offset="1" stop-color="#ffd2df"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <rect width="1200" height="720" fill="url(#sky)"/>
+  <circle cx="912" cy="150" r="94" fill="#fff" opacity=".75"/>
+  <g filter="url(#blur)" opacity=".5">
+    <circle cx="230" cy="128" r="150" fill="#ffc4d9"/>
+    <circle cx="1030" cy="420" r="170" fill="#b9dfff"/>
+    <circle cx="570" cy="250" r="210" fill="#d9c8ff"/>
+  </g>
+  <path d="M0 438c152-64 291-63 417 4 146 78 265 73 422-13 137-75 258-74 361 4v287H0z" fill="url(#water)" opacity=".76"/>
+  <path d="M0 511c146-43 286-40 420 9 142 52 282 46 420-18 124-57 244-57 360 1v217H0z" fill="#fff" opacity=".32"/>
+  <g fill="#f69fbd" opacity=".85">
+    <ellipse cx="208" cy="179" rx="18" ry="8" transform="rotate(-24 208 179)"/>
+    <ellipse cx="276" cy="318" rx="15" ry="7" transform="rotate(18 276 318)"/>
+    <ellipse cx="792" cy="256" rx="17" ry="8" transform="rotate(-32 792 256)"/>
+    <ellipse cx="1008" cy="304" rx="15" ry="7" transform="rotate(26 1008 304)"/>
+  </g>
+</svg>

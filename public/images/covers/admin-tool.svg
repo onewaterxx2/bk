@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="本地管理工具插画">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#eefaff"/>
+      <stop offset=".55" stop-color="#fff1f7"/>
+      <stop offset="1" stop-color="#fff9d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="720" fill="url(#bg)"/>
+  <rect x="150" y="120" width="900" height="500" rx="42" fill="#fff" opacity=".72"/>
+  <rect x="210" y="182" width="220" height="376" rx="30" fill="#d9eaff"/>
+  <rect x="470" y="182" width="520" height="74" rx="24" fill="#f6ddec"/>
+  <rect x="470" y="290" width="238" height="268" rx="28" fill="#fff6c9"/>
+  <rect x="742" y="290" width="248" height="268" rx="28" fill="#d7f3ec"/>
+  <path d="M250 250h140M250 318h110M250 386h132M250 454h92" stroke="#63708a" stroke-width="18" stroke-linecap="round" opacity=".58"/>
+  <circle cx="910" cy="218" r="22" fill="#6574ff"/>
+  <circle cx="858" cy="218" r="22" fill="#f398b7"/>
+</svg>

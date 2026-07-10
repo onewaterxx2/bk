@@ -1,0 +1,15 @@
+---
+const { track } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const cover = track.cover || `${base}images/covers/music.svg`;
+---
+
+<section class="music-card glass" data-audio>
+  <img src={cover} alt="" loading="lazy" />
+  <div>
+    <h3>{track.title}</h3>
+    <p>{track.artist}</p>
+    {track.src ? <audio preload="metadata" src={track.src}></audio> : <p>音乐文件稍后可通过管理工具上传。</p>}
+  </div>
+  <button class="play-button" type="button" aria-label="播放或暂停"></button>
+</section>

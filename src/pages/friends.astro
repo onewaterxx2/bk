@@ -1,0 +1,27 @@
+---
+import Layout from "../components/Layout.astro";
+import friends from "../data/friends.json";
+---
+
+<Layout title="友链" description="江水博客的友链">
+  <main class="section">
+    <div class="section-title">
+      <div>
+        <span class="kicker">Friends</span>
+        <h2>友链</h2>
+      </div>
+      <p>这里放值得长期访问的网站和朋友。</p>
+    </div>
+    <div class="grid">
+      {friends.map((friend) => (
+        <a class="card friend-card" href={friend.url} target="_blank" rel="noreferrer">
+          <img src={friend.avatar} alt="" />
+          <div>
+            <h3>{friend.name}</h3>
+            <p>{friend.description}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </main>
+</Layout>
