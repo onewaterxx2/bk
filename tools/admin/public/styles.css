@@ -88,6 +88,11 @@ button.primary {
   background: linear-gradient(135deg, var(--accent), var(--pink));
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 main {
   padding: 34px;
 }
@@ -183,6 +188,63 @@ textarea {
   background: rgba(101, 116, 255, 0.09);
 }
 
+.progress-wrap {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--ink);
+}
+
+.progress-track {
+  height: 12px;
+  margin: 12px 0 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(101, 116, 255, 0.14);
+}
+
+#progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--pink), var(--green));
+  transition: width 280ms ease;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.steps li.active {
+  color: var(--accent);
+  background: rgba(101, 116, 255, 0.12);
+}
+
+.steps li.done {
+  color: #278a72;
+  background: rgba(123, 202, 183, 0.16);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -209,7 +271,8 @@ textarea {
   }
 
   .form-grid,
-  .repeat {
+  .repeat,
+  .steps {
     grid-template-columns: 1fr;
   }
 }

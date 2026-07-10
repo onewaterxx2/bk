@@ -9,5 +9,6 @@ dist/
 模版.png
 npm-debug.log*
 *.log
+tools/admin/settings.json
 pnpm-lock.yaml
 yarn.lock

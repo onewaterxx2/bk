@@ -1,7 +1,14 @@
 const $ = (selector) => document.querySelector(selector);
 const today = new Date().toISOString().slice(0, 10);
 
-let state = { site: {}, friends: [], music: [] };
+let state = { site: {}, friends: [], music: [], settings: {} };
+
+const escapeHtml = (value = "") =>
+  String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 
 const request = async (url, body) => {
   const res = await fetch(url, {
@@ -14,10 +21,15 @@ const request = async (url, body) => {
   return data;
 };
 
-const fileToDataUrl = (file) =>
+const fileToDataUrl = (file, onProgress) =>
   new Promise((resolve) => {
     if (!file) return resolve("");
     const reader = new FileReader();
+    reader.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
     reader.onload = () => resolve(reader.result);
     reader.readAsDataURL(file);
   });
@@ -25,6 +37,19 @@ const fileToDataUrl = (file) =>
 const setMessage = (message) => {
   const output = $("#output");
   if (output) output.textContent = message;
+};
+
+const setProgress = (percent, label) => {
+  $("#progress-bar").style.width = `${percent}%`;
+  $("#progress-percent").textContent = `${percent}%`;
+  $("#progress-label").textContent = label;
+};
+
+const markStep = (index) => {
+  document.querySelectorAll("#publish-steps li").forEach((item, itemIndex) => {
+    item.classList.toggle("active", itemIndex === index);
+    item.classList.toggle("done", itemIndex < index);
+  });
 };
 
 document.querySelectorAll("nav button").forEach((button) => {
@@ -40,10 +65,10 @@ const friendRow = (friend = {}) => {
   const div = document.createElement("div");
   div.className = "repeat friend-row";
   div.innerHTML = `
-    <label>名称<input data-field="name" value="${friend.name || ""}"></label>
-    <label>链接<input data-field="url" value="${friend.url || ""}"></label>
-    <label>头像<input data-field="avatar" value="${friend.avatar || ""}"></label>
-    <label>描述<input data-field="description" value="${friend.description || ""}"></label>
+    <label>名称<input data-field="name" value="${escapeHtml(friend.name)}"></label>
+    <label>链接<input data-field="url" value="${escapeHtml(friend.url)}"></label>
+    <label>头像<input data-field="avatar" value="${escapeHtml(friend.avatar)}"></label>
+    <label>描述<input data-field="description" value="${escapeHtml(friend.description)}"></label>
   `;
   return div;
 };
@@ -52,10 +77,10 @@ const musicRow = (track = {}) => {
   const div = document.createElement("div");
   div.className = "repeat music-row";
   div.innerHTML = `
-    <label>歌名<input data-field="title" value="${track.title || ""}"></label>
-    <label>作者<input data-field="artist" value="${track.artist || ""}"></label>
-    <label>已有音频路径<input data-field="src" value="${track.src || ""}"></label>
-    <label>已有封面路径<input data-field="cover" value="${track.cover || ""}"></label>
+    <label>歌名<input data-field="title" value="${escapeHtml(track.title)}"></label>
+    <label>作者<input data-field="artist" value="${escapeHtml(track.artist)}"></label>
+    <label>已有音频路径<input data-field="src" value="${escapeHtml(track.src)}"></label>
+    <label>已有封面路径<input data-field="cover" value="${escapeHtml(track.cover)}"></label>
     <label>上传音频<input data-field="audioData" type="file" accept="audio/*"></label>
     <label>上传封面<input data-field="coverData" type="file" accept="image/*"></label>
   `;
@@ -85,6 +110,7 @@ const load = async () => {
   $("#site-github").value = state.site.github || "";
   $("#site-subtitle").value = state.site.subtitle || "";
   $("#site-bio").value = state.site.bio || "";
+  $("#git-proxy").value = state.settings.gitProxy || "http://127.0.0.1:7897";
 
   $("#friend-list").innerHTML = "";
   state.friends.forEach((friend) => $("#friend-list").append(friendRow(friend)));
@@ -105,7 +131,7 @@ $("#save-post").addEventListener("click", async () => {
     pubDate: $("#post-date").value,
     readingTime: $("#post-reading").value,
     description: $("#post-description").value,
-    coverData: await fileToDataUrl($("#post-cover").files[0]),
+    coverData: await fileToDataUrl($("#post-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
     featured: $("#post-featured").checked,
     draft: $("#post-draft").checked,
     content: $("#post-content").value
@@ -123,7 +149,7 @@ $("#save-project").addEventListener("click", async () => {
     link: $("#project-link").value,
     repo: $("#project-repo").value,
     description: $("#project-description").value,
-    coverData: await fileToDataUrl($("#project-cover").files[0]),
+    coverData: await fileToDataUrl($("#project-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
     featured: $("#project-featured").checked,
     content: $("#project-content").value
   };
@@ -137,7 +163,9 @@ $("#save-friends").addEventListener("click", async () => {
 });
 
 $("#save-music").addEventListener("click", async () => {
+  setProgress(10, "正在读取音乐文件");
   await request("/api/music", { music: await collectRows(".music-row") });
+  setProgress(100, "音乐已保存");
   alert("音乐已保存");
 });
 
@@ -157,12 +185,43 @@ $("#save-site").addEventListener("click", async () => {
 });
 
 $("#publish-btn").addEventListener("click", async () => {
-  setMessage("正在发布...");
+  const button = $("#publish-btn");
+  let timer;
+  button.disabled = true;
+  setMessage("");
   try {
+    markStep(0);
+    setProgress(10, "正在保存代理设置");
+    await request("/api/settings", { settings: { gitProxy: $("#git-proxy").value.trim() } });
+
+    markStep(1);
+    setProgress(30, "正在拉取远程更新");
+
+    const timerSteps = [
+      [2, 55, "正在整理并提交文件"],
+      [3, 80, "正在上传到 GitHub"]
+    ];
+    let index = 0;
+    timer = setInterval(() => {
+      const step = timerSteps[index];
+      if (!step) return;
+      markStep(step[0]);
+      setProgress(step[1], step[2]);
+      index += 1;
+    }, 1400);
+
     const result = await request("/api/publish", { message: $("#commit-message").value });
+    clearInterval(timer);
+    markStep(4);
+    setProgress(100, "发布完成，等待 GitHub Pages 构建");
     setMessage(result.output || "发布完成");
   } catch (error) {
+    if (timer) clearInterval(timer);
+    setProgress(100, "发布失败");
     setMessage(error.message);
+  } finally {
+    if (timer) clearInterval(timer);
+    button.disabled = false;
   }
 });
 

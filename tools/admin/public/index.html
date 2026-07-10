@@ -50,8 +50,8 @@
         </header>
         <div class="form-grid">
           <label>标题<input id="project-title" /></label>
-          <label>Slug<input id="project-slug" /></label>
-          <label>标签<input id="project-tags" /></label>
+          <label>Slug<input id="project-slug" placeholder="留空自动生成" /></label>
+          <label>标签<input id="project-tags" placeholder="用英文逗号分隔" /></label>
           <label>日期<input id="project-date" type="date" /></label>
           <label>访问链接<input id="project-link" /></label>
           <label>源码链接<input id="project-repo" /></label>
@@ -104,8 +104,26 @@
           <span>Deploy</span>
           <h2>发布到 GitHub</h2>
         </header>
-        <p class="hint">发布会依次执行 git pull --rebase、git add .、git commit、git push。</p>
-        <label>提交说明<input id="commit-message" value="publish blog update" /></label>
+        <p class="hint">发布会执行 pull、add、commit、push。GitHub 需要代理时，会使用下面的代理地址。</p>
+        <div class="form-grid">
+          <label>提交说明<input id="commit-message" value="publish blog update" /></label>
+          <label>Git 代理<input id="git-proxy" placeholder="http://127.0.0.1:7897" /></label>
+        </div>
+        <div class="progress-wrap" aria-live="polite">
+          <div class="progress-head">
+            <strong id="progress-label">等待发布</strong>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-bar"></div>
+          </div>
+          <ol class="steps" id="publish-steps">
+            <li>保存代理设置</li>
+            <li>拉取远程更新</li>
+            <li>整理并提交文件</li>
+            <li>上传到 GitHub</li>
+          </ol>
+        </div>
         <button class="primary" id="publish-btn">发布</button>
         <pre id="output"></pre>
       </section>

@@ -8,6 +8,24 @@ const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const adminPublic = join(root, "tools/admin/public");
 const port = Number(process.env.BLOG_ADMIN_PORT || 4587);
 
+const safeJoin = (...parts) => {
+  const target = resolve(root, ...parts);
+  const rel = relative(root, target);
+  if (rel.startsWith("..") || normalize(rel).startsWith("..")) {
+    throw new Error("Path escapes project root");
+  }
+  return target;
+};
+
+const settingsPath = safeJoin("tools/admin/settings.json");
+
+function readSettings() {
+  if (!existsSync(settingsPath)) {
+    return { gitProxy: "http://127.0.0.1:7897" };
+  }
+  return JSON.parse(readFileSync(settingsPath, "utf8"));
+}
+
 const json = (res, status, body) => {
   const payload = JSON.stringify(body, null, 2);
   res.writeHead(status, {
@@ -20,15 +38,6 @@ const json = (res, status, body) => {
 const text = (res, status, body, type = "text/plain; charset=utf-8") => {
   res.writeHead(status, { "content-type": type });
   res.end(body);
-};
-
-const safeJoin = (...parts) => {
-  const target = resolve(root, ...parts);
-  const rel = relative(root, target);
-  if (rel.startsWith("..") || normalize(rel).startsWith("..")) {
-    throw new Error("Path escapes project root");
-  }
-  return target;
 };
 
 const readBody = async (req) => {
@@ -93,9 +102,12 @@ const listMarkdown = (collection) => {
     });
 };
 
-const runGit = (args) =>
+const runGit = (args, options = {}) =>
   new Promise((resolvePromise) => {
-    const child = spawn("git", args, { cwd: root, shell: false });
+    const proxyArgs = options.proxy
+      ? ["-c", `http.proxy=${options.proxy}`, "-c", `https.proxy=${options.proxy}`]
+      : [];
+    const child = spawn("git", [...proxyArgs, ...args], { cwd: root, shell: false });
     let out = "";
     child.stdout.on("data", (data) => (out += data.toString()));
     child.stderr.on("data", (data) => (out += data.toString()));
@@ -104,6 +116,7 @@ const runGit = (args) =>
 
 const publish = async (message) => {
   const steps = [];
+  const settings = readSettings();
   const head = await runGit(["rev-parse", "--verify", "HEAD"]);
   const branchResult = await runGit(["branch", "--show-current"]);
   const branch = branchResult.out.trim() || "main";
@@ -122,8 +135,12 @@ const publish = async (message) => {
   commands.push(upstream.code === 0 ? ["push"] : ["push", "-u", "origin", branch]);
 
   for (const args of commands) {
-    const result = await runGit(args);
-    steps.push(`$ git ${args.join(" ")}\n${result.out}`.trim());
+    const needsProxy = ["pull", "push"].includes(args[0]);
+    const result = await runGit(args, { proxy: needsProxy ? settings.gitProxy : "" });
+    const stepLabel = needsProxy && settings.gitProxy
+      ? `$ git ${args.join(" ")}  (proxy: ${settings.gitProxy})`
+      : `$ git ${args.join(" ")}`;
+    steps.push(`${stepLabel}\n${result.out}`.trim());
     const noChanges = args[0] === "commit" && /nothing to commit|no changes added/i.test(result.out);
     if (result.code !== 0 && !noChanges) {
       return { ok: false, output: steps.join("\n\n") };
@@ -150,7 +167,8 @@ const routes = {
       projects: listMarkdown("projects"),
       site: JSON.parse(readFileSync(safeJoin("src/data/site.json"), "utf8")),
       friends: JSON.parse(readFileSync(safeJoin("src/data/friends.json"), "utf8")),
-      music: JSON.parse(readFileSync(safeJoin("src/data/music.json"), "utf8"))
+      music: JSON.parse(readFileSync(safeJoin("src/data/music.json"), "utf8")),
+      settings: readSettings()
     });
   },
   "POST /api/posts": async (req, res) => {
@@ -217,6 +235,11 @@ const routes = {
   "POST /api/site": async (req, res) => {
     const body = await readBody(req);
     writeFileSync(safeJoin("src/data/site.json"), JSON.stringify(body.site || {}, null, 2), "utf8");
+    json(res, 200, { ok: true });
+  },
+  "POST /api/settings": async (req, res) => {
+    const body = await readBody(req);
+    writeFileSync(settingsPath, JSON.stringify(body.settings || {}, null, 2), "utf8");
     json(res, 200, { ok: true });
   },
   "POST /api/publish": async (req, res) => {
