@@ -1,12 +1,12 @@
 ---
-title: "Hello，江水博客"
+title: "Hello，江水"
 description: "第一篇文章，用来说明这个博客会记录什么，以及本地管理工具会怎样参与写作。"
-pubDate: 2026-07-11
+pubDate: "2026-07-11"
 category: "随笔"
 tags: ["博客", "生活", "开始"]
 cover: "/bk/images/covers/spring-river.svg"
 featured: true
-mood: "清爽"
+draft: false
 readingTime: "3 min"
 ---
 
@@ -32,3 +32,4 @@ readingTime: "3 min"
 const blog = "江水博客";
 console.log(`${blog} 已经启航`);
 ```
+
