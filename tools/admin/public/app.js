@@ -93,7 +93,17 @@ const renderItemList = (target, items, type) => {
       <strong>${escapeHtml(item.title)}</strong>
       <span>${escapeHtml(item.slug)}</span>
     `;
-    button.addEventListener("click", () => type === "post" ? loadPost(item.slug) : loadProject(item.slug));
+    button.addEventListener("click", async () => {
+      try {
+        setProgress(5, `Loading ${type}: ${item.slug}`);
+        await (type === "post" ? loadPost(item.slug) : loadProject(item.slug));
+        document.querySelectorAll(`${target} .item-button`).forEach((entry) => entry.classList.remove("selected"));
+        button.classList.add("selected");
+      } catch (error) {
+        setProgress(100, `Failed to load ${type}`);
+        alert(`${type === "post" ? "Post" : "Project"} load failed: ${error.message}`);
+      }
+    });
     container.append(button);
   });
 };

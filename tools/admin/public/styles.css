@@ -178,6 +178,12 @@ header span {
   font-size: 12px;
 }
 
+.item-button.selected {
+  border-color: rgba(101, 116, 255, 0.46);
+  color: var(--accent);
+  background: rgba(101, 116, 255, 0.1);
+}
+
 label {
   display: grid;
   gap: 8px;
