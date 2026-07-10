@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>江水博客管理工具</title>
+    <title>&#27743;&#27700;&#21338;&#23458;&#31649;&#29702;&#24037;&#20855;</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <aside class="sidebar">
-      <div class="logo">水</div>
-      <h1>江水管理台</h1>
-      <p>本地写作、资源管理、GitHub 发布。</p>
+      <div class="logo">&#27700;</div>
+      <h1>&#27743;&#27700;&#31649;&#29702;&#21488;</h1>
+      <p>&#26412;&#22320;&#20889;&#20316;&#12289;&#36164;&#28304;&#31649;&#29702;&#12289;GitHub &#21457;&#24067;&#12290;</p>
       <nav>
-        <button class="active" data-tab="post">文章</button>
-        <button data-tab="project">作品</button>
-        <button data-tab="music">音乐</button>
-        <button data-tab="friends">友链</button>
-        <button data-tab="site">站点</button>
-        <button data-tab="publish">发布</button>
+        <button class="active" data-tab="post">&#25991;&#31456;</button>
+        <button data-tab="project">&#20316;&#21697;</button>
+        <button data-tab="music">&#38899;&#20048;</button>
+        <button data-tab="friends">&#21451;&#38142;</button>
+        <button data-tab="site">&#31449;&#28857;</button>
+        <button data-tab="publish">&#21457;&#24067;</button>
       </nav>
     </aside>
 
@@ -25,114 +25,138 @@
       <section class="panel active" id="post">
         <header>
           <span>Writing</span>
-          <h2>新建文章</h2>
+          <h2>&#25991;&#31456;&#31649;&#29702;</h2>
         </header>
-        <div class="form-grid">
-          <label>标题<input id="post-title" /></label>
-          <label>Slug<input id="post-slug" placeholder="留空自动生成" /></label>
-          <label>分类<input id="post-category" value="随笔" /></label>
-          <label>标签<input id="post-tags" placeholder="用英文逗号分隔" /></label>
-          <label>日期<input id="post-date" type="date" /></label>
-          <label>阅读时间<input id="post-reading" placeholder="3 min" /></label>
-          <label class="wide">摘要<textarea id="post-description" rows="3"></textarea></label>
-          <label>封面图<input id="post-cover" type="file" accept="image/*" /></label>
-          <label class="check"><input id="post-featured" type="checkbox" /> 首页推荐</label>
-          <label class="check"><input id="post-draft" type="checkbox" /> 草稿</label>
-          <label class="wide">正文<textarea id="post-content" rows="18" placeholder="使用 Markdown 写正文"></textarea></label>
-        </div>
-        <p class="hint">保存只会写入本地文件；要同步到 GitHub，请使用“保存并发布”或到“发布”页点击发布。</p>
-        <div class="button-row">
-          <button id="save-post">保存到本地</button>
-          <button class="primary" id="save-post-publish">保存并发布</button>
+        <div class="manager-layout">
+          <aside class="item-list">
+            <div class="list-head">
+              <strong>&#24050;&#26377;&#25991;&#31456;</strong>
+              <button type="button" id="new-post">&#26032;&#24314;</button>
+            </div>
+            <div id="post-list"></div>
+          </aside>
+          <div>
+            <div class="form-grid">
+              <label>&#26631;&#39064;<input id="post-title" /></label>
+              <label>Slug<input id="post-slug" placeholder="leave empty to generate" /></label>
+              <label>&#20998;&#31867;<input id="post-category" value="&#38543;&#31508;" /></label>
+              <label>&#26631;&#31614;<input id="post-tags" placeholder="comma separated" /></label>
+              <label>&#26085;&#26399;<input id="post-date" type="date" /></label>
+              <label>&#38405;&#35835;&#26102;&#38388;<input id="post-reading" placeholder="3 min" /></label>
+              <label class="wide">&#25688;&#35201;<textarea id="post-description" rows="3"></textarea></label>
+              <label>&#23553;&#38754;&#22270;<input id="post-cover" type="file" accept="image/*" /></label>
+              <label class="wide">&#24050;&#26377;&#23553;&#38754;&#36335;&#24452;<input id="post-cover-path" /></label>
+              <label class="check"><input id="post-featured" type="checkbox" /> &#39318;&#39029;&#25512;&#33616;</label>
+              <label class="check"><input id="post-draft" type="checkbox" /> &#33609;&#31295;</label>
+              <label class="wide">&#27491;&#25991;<textarea id="post-content" rows="18" placeholder="Markdown"></textarea></label>
+            </div>
+            <p class="hint">&#20445;&#23384;&#21482;&#20250;&#20889;&#20837;&#26412;&#22320;&#25991;&#20214;&#65307;&#35201;&#21516;&#27493;&#21040; GitHub&#65292;&#20351;&#29992;&#20445;&#23384;&#24182;&#21457;&#24067;&#12290;</p>
+            <div class="button-row">
+              <button id="save-post">&#20445;&#23384;&#21040;&#26412;&#22320;</button>
+              <button class="primary" id="save-post-publish">&#20445;&#23384;&#24182;&#21457;&#24067;</button>
+            </div>
+          </div>
         </div>
       </section>
 
       <section class="panel" id="project">
         <header>
           <span>Portfolio</span>
-          <h2>新建作品</h2>
+          <h2>&#20316;&#21697;&#31649;&#29702;</h2>
         </header>
-        <div class="form-grid">
-          <label>标题<input id="project-title" /></label>
-          <label>Slug<input id="project-slug" placeholder="留空自动生成" /></label>
-          <label>标签<input id="project-tags" placeholder="用英文逗号分隔" /></label>
-          <label>日期<input id="project-date" type="date" /></label>
-          <label>访问链接<input id="project-link" /></label>
-          <label>源码链接<input id="project-repo" /></label>
-          <label class="wide">摘要<textarea id="project-description" rows="3"></textarea></label>
-          <label>封面图<input id="project-cover" type="file" accept="image/*" /></label>
-          <label class="check"><input id="project-featured" type="checkbox" /> 首页推荐</label>
-          <label class="wide">详情<textarea id="project-content" rows="10"></textarea></label>
-        </div>
-        <p class="hint">保存只会写入本地文件；要同步到 GitHub，请使用“保存并发布”或到“发布”页点击发布。</p>
-        <div class="button-row">
-          <button id="save-project">保存到本地</button>
-          <button class="primary" id="save-project-publish">保存并发布</button>
+        <div class="manager-layout">
+          <aside class="item-list">
+            <div class="list-head">
+              <strong>&#24050;&#26377;&#20316;&#21697;</strong>
+              <button type="button" id="new-project">&#26032;&#24314;</button>
+            </div>
+            <div id="project-list"></div>
+          </aside>
+          <div>
+            <div class="form-grid">
+              <label>&#26631;&#39064;<input id="project-title" /></label>
+              <label>Slug<input id="project-slug" placeholder="leave empty to generate" /></label>
+              <label>&#26631;&#31614;<input id="project-tags" placeholder="comma separated" /></label>
+              <label>&#26085;&#26399;<input id="project-date" type="date" /></label>
+              <label>&#35775;&#38382;&#38142;&#25509;<input id="project-link" /></label>
+              <label>&#28304;&#30721;&#38142;&#25509;<input id="project-repo" /></label>
+              <label class="wide">&#25688;&#35201;<textarea id="project-description" rows="3"></textarea></label>
+              <label>&#23553;&#38754;&#22270;<input id="project-cover" type="file" accept="image/*" /></label>
+              <label class="wide">&#24050;&#26377;&#23553;&#38754;&#36335;&#24452;<input id="project-cover-path" /></label>
+              <label class="check"><input id="project-featured" type="checkbox" /> &#39318;&#39029;&#25512;&#33616;</label>
+              <label class="wide">&#35814;&#24773;<textarea id="project-content" rows="10"></textarea></label>
+            </div>
+            <p class="hint">&#20445;&#23384;&#21482;&#20250;&#20889;&#20837;&#26412;&#22320;&#25991;&#20214;&#65307;&#35201;&#21516;&#27493;&#21040; GitHub&#65292;&#20351;&#29992;&#20445;&#23384;&#24182;&#21457;&#24067;&#12290;</p>
+            <div class="button-row">
+              <button id="save-project">&#20445;&#23384;&#21040;&#26412;&#22320;</button>
+              <button class="primary" id="save-project-publish">&#20445;&#23384;&#24182;&#21457;&#24067;</button>
+            </div>
+          </div>
         </div>
       </section>
 
       <section class="panel" id="music">
         <header>
           <span>Playlist</span>
-          <h2>音乐管理</h2>
+          <h2>&#38899;&#20048;&#31649;&#29702;</h2>
         </header>
         <div id="music-list"></div>
-        <button id="add-music">添加一首</button>
-        <button class="primary" id="save-music">保存音乐</button>
+        <button id="add-music">&#28155;&#21152;&#19968;&#39318;</button>
+        <button class="primary" id="save-music">&#20445;&#23384;&#38899;&#20048;</button>
       </section>
 
       <section class="panel" id="friends">
         <header>
           <span>Links</span>
-          <h2>友链管理</h2>
+          <h2>&#21451;&#38142;&#31649;&#29702;</h2>
         </header>
         <div id="friend-list"></div>
-        <button id="add-friend">添加友链</button>
-        <button class="primary" id="save-friends">保存友链</button>
+        <button id="add-friend">&#28155;&#21152;&#21451;&#38142;</button>
+        <button class="primary" id="save-friends">&#20445;&#23384;&#21451;&#38142;</button>
       </section>
 
       <section class="panel" id="site">
         <header>
           <span>Profile</span>
-          <h2>站点资料</h2>
+          <h2>&#31449;&#28857;&#36164;&#26009;</h2>
         </header>
         <div class="form-grid">
-          <label>站点名<input id="site-title" /></label>
-          <label>昵称<input id="site-nickname" /></label>
-          <label>位置<input id="site-location" /></label>
+          <label>&#31449;&#28857;&#21517;<input id="site-title" /></label>
+          <label>&#26165;&#31216;<input id="site-nickname" /></label>
+          <label>&#20301;&#32622;<input id="site-location" /></label>
           <label>GitHub<input id="site-github" /></label>
-          <label class="wide">副标题<textarea id="site-subtitle" rows="2"></textarea></label>
-          <label class="wide">简介<textarea id="site-bio" rows="4"></textarea></label>
+          <label class="wide">&#21103;&#26631;&#39064;<textarea id="site-subtitle" rows="2"></textarea></label>
+          <label class="wide">&#31616;&#20171;<textarea id="site-bio" rows="4"></textarea></label>
         </div>
-        <button class="primary" id="save-site">保存资料</button>
+        <button class="primary" id="save-site">&#20445;&#23384;&#36164;&#26009;</button>
       </section>
 
       <section class="panel" id="publish">
         <header>
           <span>Deploy</span>
-          <h2>发布到 GitHub</h2>
+          <h2>&#21457;&#24067;&#21040; GitHub</h2>
         </header>
-        <p class="hint">发布会执行 pull、add、commit、push。GitHub 需要代理时，会使用下面的代理地址。</p>
+        <p class="hint">&#21457;&#24067;&#20250;&#25191;&#34892; add&#12289;commit&#12289;pull&#12289;push&#12290;GitHub &#38656;&#35201;&#20195;&#29702;&#26102;&#65292;&#20250;&#20351;&#29992;&#19979;&#38754;&#30340;&#20195;&#29702;&#22320;&#22336;&#12290;</p>
         <div class="form-grid">
-          <label>提交说明<input id="commit-message" value="publish blog update" /></label>
-          <label>Git 代理<input id="git-proxy" placeholder="http://127.0.0.1:7897" /></label>
+          <label>&#25552;&#20132;&#35828;&#26126;<input id="commit-message" value="publish blog update" /></label>
+          <label>Git &#20195;&#29702;<input id="git-proxy" placeholder="http://127.0.0.1:7897" /></label>
         </div>
         <div class="progress-wrap" aria-live="polite">
           <div class="progress-head">
-            <strong id="progress-label">等待发布</strong>
+            <strong id="progress-label">&#31561;&#24453;&#21457;&#24067;</strong>
             <span id="progress-percent">0%</span>
           </div>
           <div class="progress-track">
             <div id="progress-bar"></div>
           </div>
           <ol class="steps" id="publish-steps">
-            <li>保存代理设置</li>
-            <li>拉取远程更新</li>
-            <li>整理并提交文件</li>
-            <li>上传到 GitHub</li>
+            <li>&#20445;&#23384;&#20195;&#29702;&#35774;&#32622;</li>
+            <li>&#25972;&#29702;&#24182;&#25552;&#20132;&#25991;&#20214;</li>
+            <li>&#25289;&#21462;&#36828;&#31243;&#26356;&#26032;</li>
+            <li>&#19978;&#20256;&#21040; GitHub</li>
           </ol>
         </div>
-        <button class="primary" id="publish-btn">发布</button>
+        <button class="primary" id="publish-btn">&#21457;&#24067;</button>
         <pre id="output"></pre>
       </section>
     </main>

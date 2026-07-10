@@ -1,6 +1,14 @@
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  unlinkSync,
+  writeFileSync
+} from "node:fs";
 import { extname, join, normalize, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,9 +28,7 @@ const safeJoin = (...parts) => {
 const settingsPath = safeJoin("tools/admin/settings.json");
 
 function readSettings() {
-  if (!existsSync(settingsPath)) {
-    return { gitProxy: "http://127.0.0.1:7897" };
-  }
+  if (!existsSync(settingsPath)) return { gitProxy: "http://127.0.0.1:7897" };
   return JSON.parse(readFileSync(settingsPath, "utf8"));
 }
 
@@ -76,6 +82,47 @@ const frontmatter = (data) => {
   return lines.join("\n");
 };
 
+const parseScalar = (value) => {
+  const trimmed = value.trim();
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    const inner = trimmed.slice(1, -1).trim();
+    if (!inner) return [];
+    return inner
+      .split(",")
+      .map((item) => item.trim().replace(/^["']|["']$/g, ""))
+      .filter(Boolean);
+  }
+  return trimmed.replace(/^["']|["']$/g, "");
+};
+
+const parseMarkdown = (raw) => {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/m.exec(raw);
+  if (!match) return { data: {}, content: raw };
+  const data = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const index = line.indexOf(":");
+    if (index === -1) continue;
+    data[line.slice(0, index).trim()] = parseScalar(line.slice(index + 1));
+  }
+  return { data, content: match[2] || "" };
+};
+
+const collectionDir = (collection) => safeJoin("src/content", collection);
+
+const markdownPath = (collection, slug) => {
+  const safeSlug = slugify(slug);
+  return safeJoin("src/content", collection, `${safeSlug}.md`);
+};
+
+const readMarkdownItem = (collection, slug) => {
+  const file = markdownPath(collection, slug);
+  if (!existsSync(file)) return null;
+  const parsed = parseMarkdown(readFileSync(file, "utf8"));
+  return { slug: slugify(slug), ...parsed.data, content: parsed.content };
+};
+
 const saveDataUrl = (dataUrl, folder, fallbackName) => {
   if (!dataUrl) return "";
   const match = /^data:([^;]+);base64,(.+)$/.exec(dataUrl);
@@ -90,15 +137,25 @@ const saveDataUrl = (dataUrl, folder, fallbackName) => {
 };
 
 const listMarkdown = (collection) => {
-  const dir = safeJoin("src/content", collection);
+  const dir = collectionDir(collection);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((file) => file.endsWith(".md") || file.endsWith(".mdx"))
     .map((file) => {
       const full = join(dir, file);
       const raw = readFileSync(full, "utf8");
-      const title = /^title:\s*["']?(.+?)["']?\s*$/m.exec(raw)?.[1] || file;
-      return { slug: file.replace(/\.(md|mdx)$/i, ""), title, path: relative(root, full) };
+      const parsed = parseMarkdown(raw);
+      const slug = file.replace(/\.(md|mdx)$/i, "");
+      return {
+        slug,
+        title: parsed.data.title || file,
+        description: parsed.data.description || "",
+        pubDate: parsed.data.pubDate || "",
+        category: parsed.data.category || "",
+        tags: parsed.data.tags || [],
+        cover: parsed.data.cover || "",
+        path: relative(root, full)
+      };
     });
 };
 
@@ -121,9 +178,8 @@ const publish = async (message) => {
   const branchResult = await runGit(["branch", "--show-current"]);
   const branch = branchResult.out.trim() || "main";
   const upstream = await runGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
-  const commands = [];
+  const commands = [["add", "."], ["commit", "-m", message || "publish blog update"]];
 
-  commands.push(["add", "."], ["commit", "-m", message || "publish blog update"]);
   if (head.code === 0 && upstream.code === 0) {
     commands.push(["pull", "--rebase"]);
   } else if (head.code === 0) {
@@ -141,9 +197,7 @@ const publish = async (message) => {
       : `$ git ${args.join(" ")}`;
     steps.push(`${stepLabel}\n${result.out}`.trim());
     const noChanges = args[0] === "commit" && /nothing to commit|no changes added/i.test(result.out);
-    if (result.code !== 0 && !noChanges) {
-      return { ok: false, output: steps.join("\n\n") };
-    }
+    if (result.code !== 0 && !noChanges) return { ok: false, output: steps.join("\n\n") };
   }
   return { ok: true, output: steps.join("\n\n") };
 };
@@ -159,6 +213,60 @@ const contentType = (path) => {
   }[ext] || "application/octet-stream";
 };
 
+const savePost = (body) => {
+  const slug = slugify(body.slug || body.title);
+  const previousSlug = body.originalSlug ? slugify(body.originalSlug) : "";
+  const cover = body.coverData ? saveDataUrl(body.coverData, `images/posts/${slug}`, "cover") : body.cover;
+  const data = {
+    title: body.title,
+    description: body.description,
+    pubDate: body.pubDate || new Date().toISOString().slice(0, 10),
+    category: body.category || "\u968f\u7b14",
+    tags: String(body.tags || "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+    cover,
+    featured: Boolean(body.featured),
+    draft: Boolean(body.draft),
+    mood: body.mood,
+    readingTime: body.readingTime
+  };
+  mkdirSync(collectionDir("posts"), { recursive: true });
+  writeFileSync(markdownPath("posts", slug), `${frontmatter(data)}${body.content || ""}\n`, "utf8");
+  if (previousSlug && previousSlug !== slug) {
+    const previousPath = markdownPath("posts", previousSlug);
+    if (existsSync(previousPath)) unlinkSync(previousPath);
+  }
+  return slug;
+};
+
+const saveProject = (body) => {
+  const slug = slugify(body.slug || body.title);
+  const previousSlug = body.originalSlug ? slugify(body.originalSlug) : "";
+  const cover = body.coverData ? saveDataUrl(body.coverData, `images/projects/${slug}`, "cover") : body.cover;
+  const data = {
+    title: body.title,
+    description: body.description,
+    pubDate: body.pubDate || new Date().toISOString().slice(0, 10),
+    tags: String(body.tags || "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+    cover,
+    link: body.link,
+    repo: body.repo,
+    featured: Boolean(body.featured)
+  };
+  mkdirSync(collectionDir("projects"), { recursive: true });
+  writeFileSync(markdownPath("projects", slug), `${frontmatter(data)}${body.content || ""}\n`, "utf8");
+  if (previousSlug && previousSlug !== slug) {
+    const previousPath = markdownPath("projects", previousSlug);
+    if (existsSync(previousPath)) unlinkSync(previousPath);
+  }
+  return slug;
+};
+
 const routes = {
   "GET /api/content": async (_req, res) => {
     json(res, 200, {
@@ -171,47 +279,11 @@ const routes = {
     });
   },
   "POST /api/posts": async (req, res) => {
-    const body = await readBody(req);
-    const slug = slugify(body.slug || body.title);
-    const cover = body.coverData ? saveDataUrl(body.coverData, `images/posts/${slug}`, "cover") : body.cover;
-    const data = {
-      title: body.title,
-      description: body.description,
-      pubDate: body.pubDate || new Date().toISOString().slice(0, 10),
-      category: body.category || "随笔",
-      tags: String(body.tags || "")
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-      cover,
-      featured: Boolean(body.featured),
-      draft: Boolean(body.draft),
-      mood: body.mood,
-      readingTime: body.readingTime
-    };
-    mkdirSync(safeJoin("src/content/posts"), { recursive: true });
-    writeFileSync(safeJoin("src/content/posts", `${slug}.md`), `${frontmatter(data)}${body.content || ""}\n`, "utf8");
+    const slug = savePost(await readBody(req));
     json(res, 200, { ok: true, slug });
   },
   "POST /api/projects": async (req, res) => {
-    const body = await readBody(req);
-    const slug = slugify(body.slug || body.title);
-    const cover = body.coverData ? saveDataUrl(body.coverData, `images/projects/${slug}`, "cover") : body.cover;
-    const data = {
-      title: body.title,
-      description: body.description,
-      pubDate: body.pubDate || new Date().toISOString().slice(0, 10),
-      tags: String(body.tags || "")
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean),
-      cover,
-      link: body.link,
-      repo: body.repo,
-      featured: Boolean(body.featured)
-    };
-    mkdirSync(safeJoin("src/content/projects"), { recursive: true });
-    writeFileSync(safeJoin("src/content/projects", `${slug}.md`), `${frontmatter(data)}${body.content || ""}\n`, "utf8");
+    const slug = saveProject(await readBody(req));
     json(res, 200, { ok: true, slug });
   },
   "POST /api/friends": async (req, res) => {
@@ -242,8 +314,7 @@ const routes = {
     json(res, 200, { ok: true });
   },
   "POST /api/publish": async (req, res) => {
-    const body = await readBody(req);
-    const result = await publish(body.message);
+    const result = await publish((await readBody(req)).message);
     json(res, result.ok ? 200 : 500, result);
   }
 };
@@ -253,6 +324,15 @@ createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
     const key = `${req.method} ${url.pathname}`;
     if (routes[key]) return await routes[key](req, res);
+
+    if (req.method === "GET" && url.pathname.startsWith("/api/posts/")) {
+      const item = readMarkdownItem("posts", decodeURIComponent(url.pathname.slice("/api/posts/".length)));
+      return item ? json(res, 200, item) : json(res, 404, { ok: false, error: "Post not found" });
+    }
+    if (req.method === "GET" && url.pathname.startsWith("/api/projects/")) {
+      const item = readMarkdownItem("projects", decodeURIComponent(url.pathname.slice("/api/projects/".length)));
+      return item ? json(res, 200, item) : json(res, 404, { ok: false, error: "Project not found" });
+    }
 
     const requestPath = url.pathname === "/" ? "/index.html" : url.pathname;
     const target = resolve(adminPublic, `.${requestPath}`);
@@ -264,5 +344,5 @@ createServer(async (req, res) => {
     json(res, 500, { ok: false, error: error instanceof Error ? error.message : String(error) });
   }
 }).listen(port, "127.0.0.1", () => {
-  console.log(`江水博客管理工具：http://127.0.0.1:${port}`);
+  console.log(`Blog admin: http://127.0.0.1:${port}`);
 });

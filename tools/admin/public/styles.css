@@ -131,6 +131,53 @@ header span {
   margin: 22px 0;
 }
 
+.manager-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.item-list {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.list-head button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.item-button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 58px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.item-button span,
+.empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 label {
   display: grid;
   gap: 8px;
@@ -277,8 +324,13 @@ textarea {
   }
 
   .form-grid,
+  .manager-layout,
   .repeat,
   .steps {
     grid-template-columns: 1fr;
+  }
+
+  .item-list {
+    position: static;
   }
 }

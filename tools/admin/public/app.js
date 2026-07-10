@@ -1,7 +1,22 @@
 const $ = (selector) => document.querySelector(selector);
 const today = new Date().toISOString().slice(0, 10);
 
-let state = { site: {}, friends: [], music: [], settings: {} };
+let state = { posts: [], projects: [], site: {}, friends: [], music: [], settings: {} };
+let editingPostSlug = "";
+let editingProjectSlug = "";
+
+const msg = {
+  requestFailed: "\u8bf7\u6c42\u5931\u8d25",
+  saveCover: "\u6b63\u5728\u8bfb\u53d6\u5c01\u9762\u56fe",
+  savePost: "\u6b63\u5728\u4fdd\u5b58\u6587\u7ae0\u5230\u672c\u5730",
+  saveProject: "\u6b63\u5728\u4fdd\u5b58\u4f5c\u54c1\u5230\u672c\u5730",
+  saveProxy: "\u6b63\u5728\u4fdd\u5b58\u4ee3\u7406\u8bbe\u7f6e",
+  commitFiles: "\u6b63\u5728\u6574\u7406\u5e76\u63d0\u4ea4\u6587\u4ef6",
+  pullRemote: "\u6b63\u5728\u62c9\u53d6\u8fdc\u7a0b\u66f4\u65b0",
+  pushGitHub: "\u6b63\u5728\u4e0a\u4f20\u5230 GitHub",
+  publishDone: "\u53d1\u5e03\u5b8c\u6210\uff0c\u7b49\u5f85 GitHub Pages \u6784\u5efa",
+  publishFailed: "\u53d1\u5e03\u5931\u8d25"
+};
 
 const escapeHtml = (value = "") =>
   String(value)
@@ -17,7 +32,7 @@ const request = async (url, body) => {
     body: body ? JSON.stringify(body) : undefined
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || data.output || "请求失败");
+  if (!res.ok) throw new Error(data.error || data.output || msg.requestFailed);
   return data;
 };
 
@@ -33,6 +48,8 @@ const fileToDataUrl = (file, onProgress) =>
     reader.onload = () => resolve(reader.result);
     reader.readAsDataURL(file);
   });
+
+const asTagsInput = (value) => Array.isArray(value) ? value.join(", ") : String(value || "");
 
 const setMessage = (message) => {
   const output = $("#output");
@@ -61,6 +78,100 @@ const markStep = (index) => {
   });
 };
 
+const renderItemList = (target, items, type) => {
+  const container = $(target);
+  container.innerHTML = "";
+  if (!items.length) {
+    container.innerHTML = `<p class="empty">No ${type}s yet.</p>`;
+    return;
+  }
+  items.forEach((item) => {
+    const button = document.createElement("button");
+    button.className = "item-button";
+    button.type = "button";
+    button.innerHTML = `
+      <strong>${escapeHtml(item.title)}</strong>
+      <span>${escapeHtml(item.slug)}</span>
+    `;
+    button.addEventListener("click", () => type === "post" ? loadPost(item.slug) : loadProject(item.slug));
+    container.append(button);
+  });
+};
+
+const refreshContentLists = async () => {
+  const latest = await request("/api/content");
+  state.posts = latest.posts;
+  state.projects = latest.projects;
+  renderItemList("#post-list", state.posts, "post");
+  renderItemList("#project-list", state.projects, "project");
+};
+
+const clearPostForm = () => {
+  editingPostSlug = "";
+  $("#post-title").value = "";
+  $("#post-slug").value = "";
+  $("#post-category").value = "\u968f\u7b14";
+  $("#post-tags").value = "";
+  $("#post-date").value = today;
+  $("#post-reading").value = "";
+  $("#post-description").value = "";
+  $("#post-cover").value = "";
+  $("#post-cover-path").value = "";
+  $("#post-featured").checked = false;
+  $("#post-draft").checked = false;
+  $("#post-content").value = "";
+};
+
+const clearProjectForm = () => {
+  editingProjectSlug = "";
+  $("#project-title").value = "";
+  $("#project-slug").value = "";
+  $("#project-tags").value = "";
+  $("#project-date").value = today;
+  $("#project-link").value = "";
+  $("#project-repo").value = "";
+  $("#project-description").value = "";
+  $("#project-cover").value = "";
+  $("#project-cover-path").value = "";
+  $("#project-featured").checked = false;
+  $("#project-content").value = "";
+};
+
+const loadPost = async (slug) => {
+  const post = await request(`/api/posts/${encodeURIComponent(slug)}`);
+  editingPostSlug = post.slug;
+  $("#post-title").value = post.title || "";
+  $("#post-slug").value = post.slug || "";
+  $("#post-category").value = post.category || "\u968f\u7b14";
+  $("#post-tags").value = asTagsInput(post.tags);
+  $("#post-date").value = String(post.pubDate || today).slice(0, 10);
+  $("#post-reading").value = post.readingTime || "";
+  $("#post-description").value = post.description || "";
+  $("#post-cover").value = "";
+  $("#post-cover-path").value = post.cover || "";
+  $("#post-featured").checked = Boolean(post.featured);
+  $("#post-draft").checked = Boolean(post.draft);
+  $("#post-content").value = post.content || "";
+  setProgress(0, `Loaded post: ${post.slug}`);
+};
+
+const loadProject = async (slug) => {
+  const project = await request(`/api/projects/${encodeURIComponent(slug)}`);
+  editingProjectSlug = project.slug;
+  $("#project-title").value = project.title || "";
+  $("#project-slug").value = project.slug || "";
+  $("#project-tags").value = asTagsInput(project.tags);
+  $("#project-date").value = String(project.pubDate || today).slice(0, 10);
+  $("#project-link").value = project.link || "";
+  $("#project-repo").value = project.repo || "";
+  $("#project-description").value = project.description || "";
+  $("#project-cover").value = "";
+  $("#project-cover-path").value = project.cover || "";
+  $("#project-featured").checked = Boolean(project.featured);
+  $("#project-content").value = project.content || "";
+  setProgress(0, `Loaded project: ${project.slug}`);
+};
+
 document.querySelectorAll("nav button").forEach((button) => {
   button.addEventListener("click", () => activateTab(button.dataset.tab));
 });
@@ -69,10 +180,10 @@ const friendRow = (friend = {}) => {
   const div = document.createElement("div");
   div.className = "repeat friend-row";
   div.innerHTML = `
-    <label>名称<input data-field="name" value="${escapeHtml(friend.name)}"></label>
-    <label>链接<input data-field="url" value="${escapeHtml(friend.url)}"></label>
-    <label>头像<input data-field="avatar" value="${escapeHtml(friend.avatar)}"></label>
-    <label>描述<input data-field="description" value="${escapeHtml(friend.description)}"></label>
+    <label>Name<input data-field="name" value="${escapeHtml(friend.name)}"></label>
+    <label>URL<input data-field="url" value="${escapeHtml(friend.url)}"></label>
+    <label>Avatar<input data-field="avatar" value="${escapeHtml(friend.avatar)}"></label>
+    <label>Description<input data-field="description" value="${escapeHtml(friend.description)}"></label>
   `;
   return div;
 };
@@ -81,12 +192,12 @@ const musicRow = (track = {}) => {
   const div = document.createElement("div");
   div.className = "repeat music-row";
   div.innerHTML = `
-    <label>歌名<input data-field="title" value="${escapeHtml(track.title)}"></label>
-    <label>作者<input data-field="artist" value="${escapeHtml(track.artist)}"></label>
-    <label>已有音频路径<input data-field="src" value="${escapeHtml(track.src)}"></label>
-    <label>已有封面路径<input data-field="cover" value="${escapeHtml(track.cover)}"></label>
-    <label>上传音频<input data-field="audioData" type="file" accept="audio/*"></label>
-    <label>上传封面<input data-field="coverData" type="file" accept="image/*"></label>
+    <label>Title<input data-field="title" value="${escapeHtml(track.title)}"></label>
+    <label>Artist<input data-field="artist" value="${escapeHtml(track.artist)}"></label>
+    <label>Audio path<input data-field="src" value="${escapeHtml(track.src)}"></label>
+    <label>Cover path<input data-field="cover" value="${escapeHtml(track.cover)}"></label>
+    <label>Upload audio<input data-field="audioData" type="file" accept="audio/*"></label>
+    <label>Upload cover<input data-field="coverData" type="file" accept="image/*"></label>
   `;
   return div;
 };
@@ -96,8 +207,7 @@ const collectRows = async (selector) => {
   for (const row of document.querySelectorAll(selector)) {
     const item = {};
     for (const field of row.querySelectorAll("[data-field]")) {
-      if (field.type === "file") item[field.dataset.field] = await fileToDataUrl(field.files[0]);
-      else item[field.dataset.field] = field.value;
+      item[field.dataset.field] = field.type === "file" ? await fileToDataUrl(field.files[0]) : field.value;
     }
     rows.push(item);
   }
@@ -106,8 +216,8 @@ const collectRows = async (selector) => {
 
 const load = async () => {
   state = await request("/api/content");
-  $("#post-date").value = today;
-  $("#project-date").value = today;
+  clearPostForm();
+  clearProjectForm();
   $("#site-title").value = state.site.title || "";
   $("#site-nickname").value = state.site.nickname || "";
   $("#site-location").value = state.site.location || "";
@@ -116,6 +226,9 @@ const load = async () => {
   $("#site-bio").value = state.site.bio || "";
   $("#git-proxy").value = state.settings.gitProxy || "http://127.0.0.1:7897";
 
+  renderItemList("#post-list", state.posts, "post");
+  renderItemList("#project-list", state.projects, "project");
+
   $("#friend-list").innerHTML = "";
   state.friends.forEach((friend) => $("#friend-list").append(friendRow(friend)));
 
@@ -123,10 +236,13 @@ const load = async () => {
   state.music.forEach((track) => $("#music-list").append(musicRow(track)));
 };
 
+$("#new-post").addEventListener("click", clearPostForm);
+$("#new-project").addEventListener("click", clearProjectForm);
 $("#add-friend").addEventListener("click", () => $("#friend-list").append(friendRow()));
 $("#add-music").addEventListener("click", () => $("#music-list").append(musicRow()));
 
 const buildPostBody = async () => ({
+  originalSlug: editingPostSlug,
   title: $("#post-title").value,
   slug: $("#post-slug").value,
   category: $("#post-category").value,
@@ -134,22 +250,26 @@ const buildPostBody = async () => ({
   pubDate: $("#post-date").value,
   readingTime: $("#post-reading").value,
   description: $("#post-description").value,
-  coverData: await fileToDataUrl($("#post-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
+  cover: $("#post-cover-path").value,
+  coverData: await fileToDataUrl($("#post-cover").files[0], (value) => setProgress(value, msg.saveCover)),
   featured: $("#post-featured").checked,
   draft: $("#post-draft").checked,
   content: $("#post-content").value
 });
 
 const savePost = async () => {
-  setProgress(12, "正在保存文章到本地");
+  setProgress(12, msg.savePost);
   const result = await request("/api/posts", await buildPostBody());
-  setProgress(24, `文章已保存：${result.slug}`);
+  editingPostSlug = result.slug;
+  $("#post-slug").value = result.slug;
+  setProgress(24, `Saved post: ${result.slug}`);
+  await refreshContentLists();
   return result;
 };
 
 $("#save-post").addEventListener("click", async () => {
   const result = await savePost();
-  alert(`文章已保存到本地：${result.slug}\n如需上传到 GitHub，请点击“保存并发布”或到“发布”页点击发布。`);
+  alert(`Saved locally: ${result.slug}\nUse Save and publish to upload to GitHub.`);
 });
 
 $("#save-post-publish").addEventListener("click", async () => {
@@ -159,6 +279,7 @@ $("#save-post-publish").addEventListener("click", async () => {
 });
 
 const buildProjectBody = async () => ({
+  originalSlug: editingProjectSlug,
   title: $("#project-title").value,
   slug: $("#project-slug").value,
   tags: $("#project-tags").value,
@@ -166,21 +287,25 @@ const buildProjectBody = async () => ({
   link: $("#project-link").value,
   repo: $("#project-repo").value,
   description: $("#project-description").value,
-  coverData: await fileToDataUrl($("#project-cover").files[0], (value) => setProgress(value, "正在读取封面图")),
+  cover: $("#project-cover-path").value,
+  coverData: await fileToDataUrl($("#project-cover").files[0], (value) => setProgress(value, msg.saveCover)),
   featured: $("#project-featured").checked,
   content: $("#project-content").value
 });
 
 const saveProject = async () => {
-  setProgress(12, "正在保存作品到本地");
+  setProgress(12, msg.saveProject);
   const result = await request("/api/projects", await buildProjectBody());
-  setProgress(24, `作品已保存：${result.slug}`);
+  editingProjectSlug = result.slug;
+  $("#project-slug").value = result.slug;
+  setProgress(24, `Saved project: ${result.slug}`);
+  await refreshContentLists();
   return result;
 };
 
 $("#save-project").addEventListener("click", async () => {
   const result = await saveProject();
-  alert(`作品已保存到本地：${result.slug}\n如需上传到 GitHub，请点击“保存并发布”或到“发布”页点击发布。`);
+  alert(`Saved locally: ${result.slug}\nUse Save and publish to upload to GitHub.`);
 });
 
 $("#save-project-publish").addEventListener("click", async () => {
@@ -191,14 +316,14 @@ $("#save-project-publish").addEventListener("click", async () => {
 
 $("#save-friends").addEventListener("click", async () => {
   await request("/api/friends", { friends: await collectRows(".friend-row") });
-  alert("友链已保存");
+  alert("Friends saved locally.");
 });
 
 $("#save-music").addEventListener("click", async () => {
-  setProgress(10, "正在读取音乐文件");
+  setProgress(10, "Reading media files");
   await request("/api/music", { music: await collectRows(".music-row") });
-  setProgress(100, "音乐已保存");
-  alert("音乐已保存");
+  setProgress(100, "Music saved locally");
+  alert("Music saved locally.");
 });
 
 $("#save-site").addEventListener("click", async () => {
@@ -213,7 +338,7 @@ $("#save-site").addEventListener("click", async () => {
       bio: $("#site-bio").value
     }
   });
-  alert("站点资料已保存");
+  alert("Site profile saved locally.");
 });
 
 const publishNow = async () => {
@@ -223,15 +348,13 @@ const publishNow = async () => {
   setMessage("");
   try {
     markStep(0);
-    setProgress(10, "正在保存代理设置");
+    setProgress(10, msg.saveProxy);
     await request("/api/settings", { settings: { gitProxy: $("#git-proxy").value.trim() } });
 
-    markStep(1);
-    setProgress(30, "正在拉取远程更新");
-
     const timerSteps = [
-      [2, 55, "正在整理并提交文件"],
-      [3, 80, "正在上传到 GitHub"]
+      [1, 35, msg.commitFiles],
+      [2, 60, msg.pullRemote],
+      [3, 82, msg.pushGitHub]
     ];
     let index = 0;
     timer = setInterval(() => {
@@ -245,11 +368,11 @@ const publishNow = async () => {
     const result = await request("/api/publish", { message: $("#commit-message").value });
     clearInterval(timer);
     markStep(4);
-    setProgress(100, "发布完成，等待 GitHub Pages 构建");
-    setMessage(result.output || "发布完成");
+    setProgress(100, msg.publishDone);
+    setMessage(result.output || "Publish complete");
   } catch (error) {
     if (timer) clearInterval(timer);
-    setProgress(100, "发布失败");
+    setProgress(100, msg.publishFailed);
     setMessage(error.message);
   } finally {
     if (timer) clearInterval(timer);
