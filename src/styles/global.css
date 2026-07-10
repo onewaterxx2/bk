@@ -608,6 +608,43 @@ textarea {
   border-radius: 18px;
 }
 
+.prose figure {
+  margin: 28px 0;
+}
+
+.prose figure img,
+.prose p img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 18px 42px rgba(82, 92, 128, 0.14);
+}
+
+.prose figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.prose th,
+.prose td {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+}
+
+.prose [style] {
+  max-width: 100%;
+}
+
 .toc {
   position: sticky;
   top: 100px;

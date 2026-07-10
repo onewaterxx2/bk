@@ -1,13 +1,13 @@
 :root {
-  --bg: #f8fbff;
-  --panel: rgba(255, 255, 255, 0.78);
-  --ink: #293044;
-  --muted: #727b8f;
-  --line: rgba(82, 92, 120, 0.16);
-  --accent: #6574ff;
-  --pink: #f08caf;
-  --green: #7bcab7;
-  --shadow: 0 24px 70px rgba(98, 92, 131, 0.16);
+  --bg: #f6f7fb;
+  --panel: rgba(255, 255, 255, 0.82);
+  --ink: #202437;
+  --muted: #737b91;
+  --line: rgba(64, 71, 98, 0.13);
+  --accent: #2f6df6;
+  --pink: #ee7aa6;
+  --green: #20b69a;
+  --shadow: 0 26px 80px rgba(36, 44, 76, 0.14);
   font-family: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
 }
 
@@ -22,9 +22,10 @@ body {
   grid-template-columns: 280px 1fr;
   color: var(--ink);
   background:
-    radial-gradient(circle at 15% 18%, rgba(255, 205, 222, 0.7), transparent 28rem),
-    radial-gradient(circle at 80% 8%, rgba(206, 239, 255, 0.85), transparent 34rem),
-    linear-gradient(135deg, #fff8fb, #effbff 54%, #fff9d9);
+    radial-gradient(circle at 12% 10%, rgba(255, 221, 226, 0.72), transparent 28rem),
+    radial-gradient(circle at 90% 4%, rgba(194, 230, 255, 0.82), transparent 34rem),
+    radial-gradient(circle at 72% 88%, rgba(221, 246, 222, 0.72), transparent 26rem),
+    linear-gradient(135deg, #fff9fb, #f1f7ff 50%, #f8fff6);
 }
 
 button,
@@ -112,6 +113,10 @@ main {
   background: var(--panel);
   box-shadow: var(--shadow);
   backdrop-filter: blur(24px);
+}
+
+#post.panel {
+  max-width: 1380px;
 }
 
 .panel.active {
@@ -210,6 +215,75 @@ textarea {
   color: var(--ink);
   background: rgba(255, 255, 255, 0.76);
   outline: none;
+}
+
+.editor-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.editor-toolbar button {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 12px;
+}
+
+.rich-editor {
+  min-height: 620px;
+  padding: 28px;
+  overflow: auto;
+  color: #1f2535;
+  background:
+    linear-gradient(rgba(255,255,255,.72), rgba(255,255,255,.72)),
+    repeating-linear-gradient(0deg, transparent 0 33px, rgba(47,109,246,.055) 34px);
+  outline: none;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #9aa3b7;
+}
+
+.rich-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+}
+
+.rich-editor blockquote {
+  margin-left: 0;
+  padding-left: 18px;
+  border-left: 4px solid var(--accent);
+  color: #596172;
+}
+
+.rich-editor table {
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.rich-editor td,
+.rich-editor th {
+  border: 1px solid rgba(64, 71, 98, 0.18);
+  padding: 8px 10px;
 }
 
 textarea {

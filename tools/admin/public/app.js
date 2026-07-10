@@ -4,6 +4,7 @@ const today = new Date().toISOString().slice(0, 10);
 let state = { posts: [], projects: [], site: {}, friends: [], music: [], settings: {} };
 let editingPostSlug = "";
 let editingProjectSlug = "";
+let savedSelection = null;
 
 const msg = {
   requestFailed: "\u8bf7\u6c42\u5931\u8d25",
@@ -48,6 +49,50 @@ const fileToDataUrl = (file, onProgress) =>
     reader.onload = () => resolve(reader.result);
     reader.readAsDataURL(file);
   });
+
+const editor = () => $("#post-editor");
+
+const saveSelection = () => {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) savedSelection = selection.getRangeAt(0);
+};
+
+const restoreSelection = () => {
+  if (!savedSelection) return;
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(savedSelection);
+};
+
+const sanitizePastedHtml = (html) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script, iframe, object, embed, link, meta").forEach((node) => node.remove());
+  doc.body.querySelectorAll("*").forEach((node) => {
+    [...node.attributes].forEach((attr) => {
+      const name = attr.name.toLowerCase();
+      const value = attr.value.trim().toLowerCase();
+      if (name.startsWith("on") || (name === "href" && value.startsWith("javascript:"))) {
+        node.removeAttribute(attr.name);
+      }
+    });
+  });
+  return doc.body.innerHTML;
+};
+
+const insertHtml = (html) => {
+  restoreSelection();
+  document.execCommand("insertHTML", false, html);
+  saveSelection();
+};
+
+const syncEditorToTextarea = () => {
+  $("#post-content").value = editor().innerHTML.trim();
+};
+
+const setEditorHtml = (html) => {
+  editor().innerHTML = html || "";
+  syncEditorToTextarea();
+};
 
 const asTagsInput = (value) => Array.isArray(value) ? value.join(", ") : String(value || "");
 
@@ -129,7 +174,7 @@ const clearPostForm = () => {
   $("#post-cover-path").value = "";
   $("#post-featured").checked = false;
   $("#post-draft").checked = false;
-  $("#post-content").value = "";
+  setEditorHtml("");
 };
 
 const clearProjectForm = () => {
@@ -161,7 +206,7 @@ const loadPost = async (slug) => {
   $("#post-cover-path").value = post.cover || "";
   $("#post-featured").checked = Boolean(post.featured);
   $("#post-draft").checked = Boolean(post.draft);
-  $("#post-content").value = post.content || "";
+  setEditorHtml(post.content || "");
   setProgress(0, `Loaded post: ${post.slug}`);
 };
 
@@ -184,6 +229,72 @@ const loadProject = async (slug) => {
 
 document.querySelectorAll("nav button").forEach((button) => {
   button.addEventListener("click", () => activateTab(button.dataset.tab));
+});
+
+document.querySelectorAll("[data-command]").forEach((button) => {
+  button.addEventListener("click", () => {
+    restoreSelection();
+    document.execCommand(button.dataset.command, false, button.dataset.value || null);
+    syncEditorToTextarea();
+    editor().focus();
+  });
+});
+
+editor().addEventListener("keyup", () => {
+  saveSelection();
+  syncEditorToTextarea();
+});
+
+editor().addEventListener("mouseup", saveSelection);
+
+editor().addEventListener("input", syncEditorToTextarea);
+
+editor().addEventListener("paste", async (event) => {
+  event.preventDefault();
+  const files = [...event.clipboardData.files].filter((file) => file.type.startsWith("image/"));
+  if (files.length) {
+    for (const file of files) {
+      const src = await fileToDataUrl(file, (value) => setProgress(value, "Reading pasted image"));
+      insertHtml(`<figure><img src="${src}" alt=""><figcaption></figcaption></figure>`);
+    }
+    syncEditorToTextarea();
+    return;
+  }
+  const html = event.clipboardData.getData("text/html");
+  const text = event.clipboardData.getData("text/plain");
+  insertHtml(html ? sanitizePastedHtml(html) : escapeHtml(text).replace(/\n/g, "<br>"));
+  syncEditorToTextarea();
+});
+
+editor().addEventListener("drop", async (event) => {
+  const files = [...event.dataTransfer.files].filter((file) => file.type.startsWith("image/"));
+  if (!files.length) return;
+  event.preventDefault();
+  for (const file of files) {
+    const src = await fileToDataUrl(file, (value) => setProgress(value, "Reading dropped image"));
+    insertHtml(`<figure><img src="${src}" alt=""><figcaption></figcaption></figure>`);
+  }
+  syncEditorToTextarea();
+});
+
+$("#editor-link").addEventListener("click", () => {
+  const href = prompt("URL");
+  if (!href) return;
+  restoreSelection();
+  document.execCommand("createLink", false, href);
+  syncEditorToTextarea();
+});
+
+$("#editor-image").addEventListener("click", () => {
+  const src = prompt("Image URL");
+  if (!src) return;
+  insertHtml(`<figure><img src="${escapeHtml(src)}" alt=""><figcaption></figcaption></figure>`);
+  syncEditorToTextarea();
+});
+
+$("#editor-clear").addEventListener("click", () => {
+  if (!confirm("Clear editor content?")) return;
+  setEditorHtml("");
 });
 
 const friendRow = (friend = {}) => {
@@ -264,7 +375,7 @@ const buildPostBody = async () => ({
   coverData: await fileToDataUrl($("#post-cover").files[0], (value) => setProgress(value, msg.saveCover)),
   featured: $("#post-featured").checked,
   draft: $("#post-draft").checked,
-  content: $("#post-content").value
+  content: (syncEditorToTextarea(), $("#post-content").value)
 });
 
 const savePost = async () => {

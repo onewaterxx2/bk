@@ -136,6 +136,26 @@ const saveDataUrl = (dataUrl, folder, fallbackName) => {
   return `/bk/${folder}/${filename}`.replace(/\\/g, "/");
 };
 
+const saveInlineImage = (dataUrl, folder, fallbackName) => {
+  const match = /^data:image\/([^;]+);base64,(.+)$/i.exec(dataUrl);
+  if (!match) return dataUrl;
+  const ext = match[1].replace("jpeg", "jpg");
+  const dir = safeJoin("public", folder);
+  mkdirSync(dir, { recursive: true });
+  const filename = `${fallbackName}.${ext}`;
+  writeFileSync(join(dir, filename), Buffer.from(match[2], "base64"));
+  return `/bk/${folder}/${filename}`.replace(/\\/g, "/");
+};
+
+const processContentAssets = (content, folder) => {
+  let index = 0;
+  return String(content || "").replace(/<img\b([^>]*?)\bsrc=(["'])(data:image\/[^"']+)\2([^>]*)>/gi, (_match, before, quote, src, after) => {
+    index += 1;
+    const saved = saveInlineImage(src, folder, `inline-${index}`);
+    return `<img${before}src=${quote}${saved}${quote}${after}>`;
+  });
+};
+
 const listMarkdown = (collection) => {
   const dir = collectionDir(collection);
   if (!existsSync(dir)) return [];
@@ -233,7 +253,8 @@ const savePost = (body) => {
     readingTime: body.readingTime
   };
   mkdirSync(collectionDir("posts"), { recursive: true });
-  writeFileSync(markdownPath("posts", slug), `${frontmatter(data)}${body.content || ""}\n`, "utf8");
+  const content = processContentAssets(body.content, `images/posts/${slug}`);
+  writeFileSync(markdownPath("posts", slug), `${frontmatter(data)}${content}\n`, "utf8");
   if (previousSlug && previousSlug !== slug) {
     const previousPath = markdownPath("posts", previousSlug);
     if (existsSync(previousPath)) unlinkSync(previousPath);

@@ -48,7 +48,21 @@
               <label class="wide">&#24050;&#26377;&#23553;&#38754;&#36335;&#24452;<input id="post-cover-path" /></label>
               <label class="check"><input id="post-featured" type="checkbox" /> &#39318;&#39029;&#25512;&#33616;</label>
               <label class="check"><input id="post-draft" type="checkbox" /> &#33609;&#31295;</label>
-              <label class="wide">&#27491;&#25991;<textarea id="post-content" rows="18" placeholder="Markdown"></textarea></label>
+              <div class="wide editor-card">
+                <div class="editor-toolbar" aria-label="Editor toolbar">
+                  <button type="button" data-command="formatBlock" data-value="h2">H2</button>
+                  <button type="button" data-command="formatBlock" data-value="h3">H3</button>
+                  <button type="button" data-command="bold"><strong>B</strong></button>
+                  <button type="button" data-command="italic"><em>I</em></button>
+                  <button type="button" data-command="insertUnorderedList">&#8226;</button>
+                  <button type="button" data-command="insertOrderedList">1.</button>
+                  <button type="button" id="editor-link">Link</button>
+                  <button type="button" id="editor-image">Image</button>
+                  <button type="button" id="editor-clear">Clear</button>
+                </div>
+                <div id="post-editor" class="rich-editor" contenteditable="true" spellcheck="false" data-placeholder="Paste a webpage, write rich text, or drag images here."></div>
+                <textarea id="post-content" hidden></textarea>
+              </div>
             </div>
             <p class="hint">&#20445;&#23384;&#21482;&#20250;&#20889;&#20837;&#26412;&#22320;&#25991;&#20214;&#65307;&#35201;&#21516;&#27493;&#21040; GitHub&#65292;&#20351;&#29992;&#20445;&#23384;&#24182;&#21457;&#24067;&#12290;</p>
             <div class="button-row">
@@ -161,6 +175,6 @@
       </section>
     </main>
 
-    <script src="/app.js?v=20260711-admin-edit"></script>
+    <script src="/app.js?v=20260711-rich-editor"></script>
   </body>
 </html>
