@@ -136,6 +136,15 @@ const saveDataUrl = (dataUrl, folder, fallbackName) => {
   return `/bk/${folder}/${filename}`.replace(/\\/g, "/");
 };
 
+const saveTextAsset = (content, folder, fallbackName, extension = "txt") => {
+  if (!content) return "";
+  const dir = safeJoin("public", folder);
+  mkdirSync(dir, { recursive: true });
+  const filename = `${fallbackName}.${extension}`;
+  writeFileSync(join(dir, filename), content, "utf8");
+  return `/bk/${folder}/${filename}`.replace(/\\/g, "/");
+};
+
 const saveInlineImage = (dataUrl, folder, fallbackName) => {
   const match = /^data:image\/([^;]+);base64,(.+)$/i.exec(dataUrl);
   if (!match) return dataUrl;
@@ -316,11 +325,12 @@ const routes = {
     const body = await readBody(req);
     const tracks = [];
     for (const item of body.music || []) {
-      if (!item.title && !item.artist && !item.src && !item.audioData && !item.cover && !item.coverData) continue;
+      if (!item.title && !item.artist && !item.src && !item.audioData && !item.cover && !item.coverData && !item.lyrics && !item.lyricsData) continue;
       const slug = slugify(`${item.title}-${item.artist}`);
       const src = item.audioData ? saveDataUrl(item.audioData, "media/music", slug) : item.src;
       const cover = item.coverData ? saveDataUrl(item.coverData, `images/music/${slug}`, "cover") : item.cover;
-      tracks.push({ title: item.title, artist: item.artist, src, cover });
+      const lyrics = item.lyricsData ? saveTextAsset(item.lyricsData, "media/lyrics", slug, "lrc") : item.lyrics;
+      tracks.push({ title: item.title, artist: item.artist, src, cover, lyrics });
     }
     writeFileSync(safeJoin("src/data/music.json"), JSON.stringify(tracks, null, 2), "utf8");
     json(res, 200, { ok: true });

@@ -50,6 +50,14 @@ const fileToDataUrl = (file, onProgress) =>
     reader.readAsDataURL(file);
   });
 
+const fileToText = (file) =>
+  new Promise((resolve) => {
+    if (!file) return resolve("");
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsText(file, "utf-8");
+  });
+
 const editor = () => $("#post-editor");
 
 const saveSelection = () => {
@@ -317,8 +325,10 @@ const musicRow = (track = {}) => {
     <label>Artist<input data-field="artist" value="${escapeHtml(track.artist)}"></label>
     <label>Audio path<input data-field="src" value="${escapeHtml(track.src)}"></label>
     <label>Cover path<input data-field="cover" value="${escapeHtml(track.cover)}"></label>
+    <label>Lyrics path<input data-field="lyrics" value="${escapeHtml(track.lyrics)}"></label>
     <label>Upload audio<input data-field="audioData" type="file" accept="audio/*"></label>
     <label>Upload cover<input data-field="coverData" type="file" accept="image/*"></label>
+    <label>Upload LRC<input data-field="lyricsData" type="file" accept=".lrc,text/plain"></label>
   `;
   return div;
 };
@@ -328,7 +338,11 @@ const collectRows = async (selector) => {
   for (const row of document.querySelectorAll(selector)) {
     const item = {};
     for (const field of row.querySelectorAll("[data-field]")) {
-      item[field.dataset.field] = field.type === "file" ? await fileToDataUrl(field.files[0]) : field.value;
+      if (field.type === "file" && field.dataset.field === "lyricsData") {
+        item[field.dataset.field] = await fileToText(field.files[0]);
+      } else {
+        item[field.dataset.field] = field.type === "file" ? await fileToDataUrl(field.files[0]) : field.value;
+      }
     }
     rows.push(item);
   }

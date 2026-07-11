@@ -5,12 +5,34 @@ const { track } = Astro.props;
 const cover = track.cover || withBase("images/covers/music.svg");
 ---
 
-<section class="music-card glass" data-audio>
-  <img src={cover} alt="" loading="lazy" />
-  <div>
-    <h3>{track.title}</h3>
-    <p>{track.artist}</p>
-    {track.src ? <audio preload="metadata" src={track.src}></audio> : <p>音乐文件稍后可通过管理工具上传。</p>}
+<section
+  class="music-card glass"
+  data-audio
+  data-title={track.title}
+  data-artist={track.artist}
+  data-cover={cover}
+  data-src={track.src || ""}
+  data-lyrics={track.lyrics || ""}
+>
+  <img class="music-cover" src={cover} alt="" loading="lazy" />
+  <div class="music-main">
+    <div class="music-meta">
+      <h3>{track.title}</h3>
+      <p>{track.artist}</p>
+      {track.src ? <audio preload="metadata" src={track.src}></audio> : <p>音乐文件稍后可通过管理工具上传。</p>}
+    </div>
+    <div class="music-progress" data-progress-shell>
+      <span data-current-time>0:00</span>
+      <input data-progress type="range" min="0" max="1000" value="0" aria-label="播放进度" />
+      <span data-duration>0:00</span>
+    </div>
+    <div class="lyrics-panel" data-lyrics-panel>
+      <p data-lyrics-line>暂无歌词</p>
+    </div>
   </div>
-  <button class="play-button" type="button" aria-label="播放或暂停"></button>
+  <div class="music-controls">
+    <button class="track-button" type="button" data-prev-track aria-label="上一首">‹</button>
+    <button class="play-button" type="button" data-play-track aria-label="播放或暂停"></button>
+    <button class="track-button" type="button" data-next-track aria-label="下一首">›</button>
+  </div>
 </section>
