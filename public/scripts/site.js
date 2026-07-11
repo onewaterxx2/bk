@@ -27,6 +27,42 @@
 
   const getPlayerSource = (player) => normalizeSrc(player?.dataset.src || player?.querySelector("audio")?.src || "");
 
+  const getPlaylist = () => {
+    const node = document.getElementById("site-playlist");
+    if (!node?.textContent) return [];
+    try {
+      return JSON.parse(node.textContent);
+    } catch {
+      return [];
+    }
+  };
+
+  const findTrackBySource = (source) => {
+    const target = normalizeSrc(source);
+    return getPlaylist().find((track) => normalizeSrc(track.src) === target);
+  };
+
+  const isMiniPlayer = (player) => !player.closest(".music-list");
+
+  const applyTrackToPlayer = (player, track) => {
+    if (!player || !track) return;
+    const cover = track.cover || player.dataset.cover || "";
+    player.dataset.title = track.title || "";
+    player.dataset.artist = track.artist || "";
+    player.dataset.cover = cover;
+    player.dataset.src = track.src || "";
+    player.dataset.lyrics = track.lyrics || "";
+
+    const image = player.querySelector(".music-cover");
+    const title = player.querySelector(".music-meta h3");
+    const artist = player.querySelector(".music-meta > p");
+    const audio = player.querySelector("audio");
+    if (image && cover) image.src = cover;
+    if (title) title.textContent = track.title || "";
+    if (artist) artist.textContent = track.artist || "";
+    if (audio && track.src) audio.src = track.src;
+  };
+
   const parseLrc = (raw) => {
     const lines = [];
     String(raw || "").split(/\r?\n/).forEach((line) => {
@@ -93,6 +129,10 @@
     const playable = getPlayablePlayers();
 
     getPlayers().forEach((player) => {
+      if (isMiniPlayer(player)) {
+        applyTrackToPlayer(player, findTrackBySource(activeSrc));
+      }
+
       const button = player.querySelector("[data-play-track]");
       const progress = player.querySelector("[data-progress]");
       const current = player.querySelector("[data-current-time]");

@@ -8,6 +8,7 @@ import { ClientRouter } from "astro:transitions";
 const { title = site.title, description = site.subtitle } = Astro.props;
 const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`;
 const persistentTrack = music.find((track) => track.src);
+const playlistJson = JSON.stringify(music.filter((track) => track.src)).replace(/</g, "\\u003c");
 ---
 
 <!doctype html>
@@ -32,6 +33,7 @@ const persistentTrack = music.find((track) => track.src);
         />
       )
     }
+    <script is:inline type="application/json" id="site-playlist" set:html={playlistJson}></script>
     <div class="reading-progress" data-reading-progress></div>
     <div class="site-shell">
       <header class="topbar">
