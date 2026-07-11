@@ -21,10 +21,15 @@ if (!window.__jiangshuiAudioVisualizer) {
     let analyser;
     let frequencyData;
     let mediaSource;
+    let lastFrameTime = 0;
+    let visualTime = 0;
+    let lastAudioTime = 0;
+    let lastAudioSource = "";
     let intensity = 0;
     let bass = 0;
     let mid = 0;
     let treble = 0;
+    let beatPulse = 0;
     let particleCount = 0;
     let basePositions;
     let positions;
@@ -136,7 +141,7 @@ if (!window.__jiangshuiAudioVisualizer) {
         mediaSource = audioContext.createMediaElementSource(audio);
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.82;
+        analyser.smoothingTimeConstant = 0.68;
         frequencyData = new Uint8Array(analyser.frequencyBinCount);
         mediaSource.connect(analyser);
         analyser.connect(audioContext.destination);
@@ -155,18 +160,46 @@ if (!window.__jiangshuiAudioVisualizer) {
       return count ? total / count / 255 : 0;
     };
 
+    const getAudioSource = () => audio.currentSrc || audio.src || "";
+
+    const resetAudioMotion = (resetClock = false) => {
+      bass = 0;
+      mid = 0;
+      treble = 0;
+      intensity = 0;
+      beatPulse = 0;
+      lastFrameTime = 0;
+      lastAudioTime = audio.currentTime || 0;
+      lastAudioSource = getAudioSource();
+      if (resetClock) visualTime = 0;
+    };
+
     const sampleAudio = () => {
       if (analyser && frequencyData && !audio.paused) {
+        const audioTime = audio.currentTime || 0;
+        const audioSource = getAudioSource();
+        if (audioSource && audioSource !== lastAudioSource) resetAudioMotion(true);
+        if (audioTime + 0.2 < lastAudioTime) resetAudioMotion(true);
+        lastAudioTime = audioTime;
+        lastAudioSource = audioSource;
+
         analyser.getByteFrequencyData(frequencyData);
-        bass = bass * 0.7 + average(1, 16) * 0.3;
-        mid = mid * 0.74 + average(16, 74) * 0.26;
-        treble = treble * 0.78 + average(74, 180) * 0.22;
+        const rawBass = average(1, 16);
+        const rawMid = average(16, 74);
+        const rawTreble = average(74, 180);
+        const bassHit = Math.max(0, rawBass - bass);
+
+        bass = bass * 0.78 + rawBass * 0.22;
+        mid = mid * 0.82 + rawMid * 0.18;
+        treble = treble * 0.86 + rawTreble * 0.14;
+        beatPulse = Math.max(beatPulse * 0.88, Math.min(1, bassHit * 3.2));
         intensity = Math.min(1, bass * 0.62 + mid * 0.28 + treble * 0.22);
       } else {
-        bass *= 0.94;
-        mid *= 0.94;
-        treble *= 0.94;
-        intensity *= 0.94;
+        bass *= 0.9;
+        mid *= 0.9;
+        treble *= 0.9;
+        intensity *= 0.9;
+        beatPulse *= 0.86;
       }
     };
 
@@ -176,11 +209,14 @@ if (!window.__jiangshuiAudioVisualizer) {
         return;
       }
 
-      const time = timeMs * 0.001;
+      const frameSeconds = lastFrameTime ? Math.min(0.05, Math.max(0, (timeMs - lastFrameTime) * 0.001)) : 1 / 60;
+      lastFrameTime = timeMs;
+      visualTime += frameSeconds;
+      const time = visualTime;
       sampleAudio();
 
       const wave = 0.18 + mid * 1.05;
-      const bloom = 1 + bass * 0.42;
+      const bloom = 1 + bass * 0.22 + beatPulse * 0.16;
       const sparkle = 0.16 + treble * 0.78;
 
       for (let i = 0; i < particleCount; i += 1) {
@@ -190,12 +226,12 @@ if (!window.__jiangshuiAudioVisualizer) {
         const z = basePositions[i3 + 2];
         const phase = phases[i];
         const drift = Math.sin(time * 0.38 + phase) * 0.12;
-        const ripple = Math.sin(x * 1.45 + time * (1.1 + bass * 1.8) + phase) * wave;
-        const spiral = Math.cos(time * 0.24 + z + phase) * (0.08 + bass * 0.36);
+        const ripple = Math.sin(x * 1.45 + time * 1.12 + phase) * wave;
+        const spiral = Math.cos(time * 0.24 + z + phase) * (0.08 + bass * 0.18 + beatPulse * 0.18);
 
         positions[i3] = x * bloom + drift;
-        positions[i3 + 1] = y + ripple + Math.sin(time * 0.72 + phase) * 0.07;
-        positions[i3 + 2] = z + spiral + Math.cos(x + time * 0.5) * treble * 0.55;
+        positions[i3 + 1] = y + ripple + Math.sin(time * 0.72 + phase) * (0.07 + beatPulse * 0.16);
+        positions[i3 + 2] = z + spiral + Math.cos(x + time * 0.5) * treble * 0.4;
 
         const color = palette[i % palette.length];
         colors[i3] = Math.min(1, color.r + sparkle * 0.22);
@@ -207,7 +243,7 @@ if (!window.__jiangshuiAudioVisualizer) {
       geometry.attributes.color.needsUpdate = true;
       points.rotation.y = Math.sin(time * 0.12) * 0.09;
       points.rotation.z = Math.sin(time * 0.08) * 0.025;
-      points.material.opacity = 0.42 + intensity * 0.4;
+      points.material.opacity = 0.42 + intensity * 0.32 + beatPulse * 0.12;
       camera.position.y = Math.sin(time * 0.16) * 0.12;
       renderer.render(scene, camera);
       animationFrame = window.requestAnimationFrame(animate);
@@ -227,6 +263,7 @@ if (!window.__jiangshuiAudioVisualizer) {
     const stop = () => {
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
       animationFrame = 0;
+      lastFrameTime = 0;
       setState();
     };
 
@@ -254,12 +291,29 @@ if (!window.__jiangshuiAudioVisualizer) {
 
     audio.addEventListener("play", async () => {
       if (!enabled) return;
+      if (audio.currentTime < 0.25) resetAudioMotion(true);
       await setupAudio();
       await start();
     });
 
     audio.addEventListener("pause", () => {
       start();
+    });
+
+    audio.addEventListener("seeked", () => {
+      resetAudioMotion(audio.currentTime < 0.5);
+    });
+
+    audio.addEventListener("loadstart", () => {
+      resetAudioMotion(true);
+    });
+
+    audio.addEventListener("loadedmetadata", () => {
+      resetAudioMotion(audio.currentTime < 0.5);
+    });
+
+    audio.addEventListener("ended", () => {
+      resetAudioMotion(true);
     });
 
     document.addEventListener("visibilitychange", () => {
