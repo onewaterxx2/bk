@@ -66,7 +66,7 @@ const restoreSelection = () => {
 
 const sanitizePastedHtml = (html) => {
   const doc = new DOMParser().parseFromString(html, "text/html");
-  doc.querySelectorAll("script, iframe, object, embed, link, meta").forEach((node) => node.remove());
+  doc.querySelectorAll("script, style, iframe, object, embed, link, meta").forEach((node) => node.remove());
   doc.body.querySelectorAll("*").forEach((node) => {
     [...node.attributes].forEach((attr) => {
       const name = attr.name.toLowerCase();
