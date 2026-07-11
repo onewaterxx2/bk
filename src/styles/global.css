@@ -293,6 +293,7 @@ textarea {
   line-height: 0.98;
   letter-spacing: 0;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .hero-copy {
@@ -1071,8 +1072,10 @@ textarea {
   }
 
   .hero h1 {
-    font-size: 44px;
-    line-height: 1.08;
+    max-width: 100%;
+    font-size: 38px;
+    line-height: 1.12;
+    word-break: break-all;
   }
 
   .profile-head,
