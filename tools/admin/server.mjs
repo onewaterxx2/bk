@@ -316,6 +316,7 @@ const routes = {
     const body = await readBody(req);
     const tracks = [];
     for (const item of body.music || []) {
+      if (!item.title && !item.artist && !item.src && !item.audioData && !item.cover && !item.coverData) continue;
       const slug = slugify(`${item.title}-${item.artist}`);
       const src = item.audioData ? saveDataUrl(item.audioData, "media/music", slug) : item.src;
       const cover = item.coverData ? saveDataUrl(item.coverData, `images/music/${slug}`, "cover") : item.cover;

@@ -435,19 +435,40 @@ $("#save-project-publish").addEventListener("click", async () => {
   await publishNow();
 });
 
-$("#save-friends").addEventListener("click", async () => {
+const saveFriends = async () => {
   await request("/api/friends", { friends: await collectRows(".friend-row") });
+  setProgress(24, "Friends saved locally");
+};
+
+$("#save-friends").addEventListener("click", async () => {
+  await saveFriends();
   alert("Friends saved locally.");
 });
 
-$("#save-music").addEventListener("click", async () => {
+$("#save-friends-publish").addEventListener("click", async () => {
+  activateTab("publish");
+  await saveFriends();
+  await publishNow();
+});
+
+const saveMusic = async () => {
   setProgress(10, "Reading media files");
   await request("/api/music", { music: await collectRows(".music-row") });
   setProgress(100, "Music saved locally");
+};
+
+$("#save-music").addEventListener("click", async () => {
+  await saveMusic();
   alert("Music saved locally.");
 });
 
-$("#save-site").addEventListener("click", async () => {
+$("#save-music-publish").addEventListener("click", async () => {
+  activateTab("publish");
+  await saveMusic();
+  await publishNow();
+});
+
+const saveSite = async () => {
   await request("/api/site", {
     site: {
       ...state.site,
@@ -459,7 +480,18 @@ $("#save-site").addEventListener("click", async () => {
       bio: $("#site-bio").value
     }
   });
+  setProgress(24, "Site profile saved locally");
+};
+
+$("#save-site").addEventListener("click", async () => {
+  await saveSite();
   alert("Site profile saved locally.");
+});
+
+$("#save-site-publish").addEventListener("click", async () => {
+  activateTab("publish");
+  await saveSite();
+  await publishNow();
 });
 
 const publishNow = async () => {
