@@ -36,6 +36,7 @@
 
 html {
   min-height: 100%;
+  overflow-x: clip;
   scroll-behavior: smooth;
 }
 
@@ -43,6 +44,7 @@ body {
   isolation: isolate;
   min-height: 100%;
   margin: 0;
+  overflow-x: clip;
   color: var(--ink);
   font-family: var(--font-sans);
   line-height: 1.75;
@@ -242,7 +244,7 @@ textarea {
 
 .hero-art {
   position: absolute;
-  inset: 44px -8vw auto;
+  inset: 44px 0 auto;
   height: 560px;
   z-index: -1;
   overflow: hidden;
@@ -290,6 +292,7 @@ textarea {
   font-size: clamp(48px, 8vw, 104px);
   line-height: 0.98;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .hero-copy {
@@ -1068,7 +1071,8 @@ textarea {
   }
 
   .hero h1 {
-    font-size: 52px;
+    font-size: 44px;
+    line-height: 1.08;
   }
 
   .profile-head,
