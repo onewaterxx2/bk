@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>光影照片墙</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="topbar" aria-label="照片墙控制栏">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div>
+          <p class="eyebrow">LOCAL ALBUM</p>
+          <h1>光影照片墙</h1>
+        </div>
+      </div>
+
+      <nav class="controls" aria-label="媒体筛选">
+        <button class="control is-active" type="button" data-filter="all">全部</button>
+        <button class="control" type="button" data-filter="image">照片</button>
+        <button class="control" type="button" data-filter="video">视频</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-label="精选媒体">
+        <div class="hero-media" id="heroMedia"></div>
+        <div class="hero-copy">
+          <p class="hero-kicker">2026 / 私人影像集</p>
+          <h2>把这一组瞬间铺成一面会呼吸的墙</h2>
+          <div class="stats" aria-label="媒体统计">
+            <span><strong id="photoCount">0</strong> 张照片</span>
+            <span><strong id="videoCount">0</strong> 段视频</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="wall-wrap" aria-label="照片墙">
+        <div class="wall-head">
+          <p>GALLERY WALL</p>
+          <span id="visibleCount">0 项</span>
+        </div>
+        <div class="masonry" id="gallery"></div>
+      </section>
+    </main>
+
+    <dialog class="lightbox" id="lightbox" aria-label="媒体预览">
+      <button class="icon-button close" type="button" id="closeLightbox" aria-label="关闭预览">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+
+      <button class="icon-button nav prev" type="button" id="prevMedia" aria-label="上一项">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+
+      <div class="stage" id="stage"></div>
+
+      <button class="icon-button nav next" type="button" id="nextMedia" aria-label="下一项">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
+
+      <footer class="caption">
+        <span id="captionType"></span>
+        <strong id="captionIndex"></strong>
+      </footer>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
