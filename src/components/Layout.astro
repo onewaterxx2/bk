@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import site from "../data/site.json";
 import music from "../data/music.json";
+import AudioVisualizer from "./AudioVisualizer.astro";
 import { withBase } from "../lib/paths";
 import { ClientRouter } from "astro:transitions";
 
@@ -34,6 +35,7 @@ const playlistJson = JSON.stringify(music.filter((track) => track.src)).replace(
       )
     }
     <script is:inline type="application/json" id="site-playlist" set:html={playlistJson}></script>
+    <AudioVisualizer />
     <div class="reading-progress" data-reading-progress></div>
     <div class="site-shell">
       <header class="topbar">

@@ -40,6 +40,7 @@ html {
 }
 
 body {
+  isolation: isolate;
   min-height: 100%;
   margin: 0;
   color: var(--ink);
@@ -69,12 +70,62 @@ body::after {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.72) 0 1px, transparent 2px) 0 0 / 48px 48px,
     linear-gradient(120deg, transparent 0 35%, rgba(255, 255, 255, 0.32), transparent 62%);
   opacity: 0.44;
+}
+
+.audio-visualizer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.audio-visualizer[data-enabled="true"] {
+  opacity: 0.66;
+}
+
+.audio-visualizer canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.visualizer-toggle {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 14px 38px rgba(98, 92, 131, 0.16);
+  backdrop-filter: blur(18px);
+  cursor: pointer;
+  transition: transform 180ms ease, color 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.visualizer-toggle:hover,
+.visualizer-toggle[data-enabled="true"] {
+  transform: translateY(-1px);
+  color: var(--ink);
+  border-color: rgba(101, 116, 255, 0.26);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.visualizer-toggle[data-enabled="true"] {
+  color: var(--accent);
 }
 
 a {
@@ -106,6 +157,8 @@ textarea {
 }
 
 .site-shell {
+  position: relative;
+  z-index: 2;
   width: min(1180px, calc(100% - 34px));
   margin: 0 auto;
 }
@@ -1003,6 +1056,17 @@ textarea {
     width: min(100% - 22px, 1180px);
   }
 
+  .audio-visualizer[data-enabled="true"] {
+    opacity: 0.48;
+  }
+
+  .visualizer-toggle {
+    right: 14px;
+    bottom: 14px;
+    width: 38px;
+    height: 38px;
+  }
+
   .hero h1 {
     font-size: 52px;
   }
@@ -1061,5 +1125,12 @@ textarea {
 
   .stats {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-visualizer,
+  .visualizer-toggle {
+    display: none;
   }
 }
