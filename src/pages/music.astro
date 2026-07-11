@@ -2,19 +2,34 @@
 import Layout from "../components/Layout.astro";
 import MusicCard from "../components/MusicCard.astro";
 import music from "../data/music.json";
+
+const tracks = music.filter((track) => track.src);
 ---
 
 <Layout title="音乐" description="江水博客的音乐收藏">
-  <main class="section">
-    <div class="section-title">
-      <div>
-        <span class="kicker">Music</span>
-        <h2>音乐</h2>
+  <main class="section music-page">
+    <section class="music-heading">
+      <div class="section-title">
+        <div>
+          <span class="kicker">Music</span>
+          <h2>音乐</h2>
+        </div>
+        <p>把喜欢的音乐放在这里，通过本地管理工具上传后会自动更新播放列表。</p>
       </div>
-      <p>之后可以通过本地管理工具上传音乐文件并更新这里的播放列表。</p>
-    </div>
-    <div class="grid two">
-      {music.map((track) => <MusicCard track={track} />)}
-    </div>
+      <div class="music-stats glass">
+        <strong>{tracks.length}</strong>
+        <span>Tracks</span>
+      </div>
+    </section>
+
+    {
+      tracks.length > 0 ? (
+        <div class="music-list">
+          {tracks.map((track) => <MusicCard track={track} />)}
+        </div>
+      ) : (
+        <p class="empty-state glass">还没有上传音乐。</p>
+      )
+    }
   </main>
 </Layout>

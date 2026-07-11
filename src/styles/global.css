@@ -373,6 +373,10 @@ textarea {
   font-size: 13px;
 }
 
+.music-card audio {
+  display: none;
+}
+
 .play-button {
   display: grid;
   place-items: center;
@@ -463,6 +467,81 @@ textarea {
 
 .grid.two {
   grid-template-columns: repeat(2, 1fr);
+}
+
+.music-page {
+  min-height: calc(100vh - 180px);
+  padding-top: 64px;
+}
+
+.music-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.music-heading .section-title {
+  display: block;
+  margin: 0;
+}
+
+.music-heading .section-title p {
+  max-width: 700px;
+  margin-top: 12px;
+}
+
+.music-stats {
+  display: grid;
+  place-items: center;
+  min-width: 132px;
+  min-height: 104px;
+  padding: 18px;
+  text-align: center;
+}
+
+.music-stats strong {
+  color: var(--accent);
+  font-size: 42px;
+  line-height: 1;
+}
+
+.music-stats span {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.music-list {
+  display: grid;
+  gap: 16px;
+  max-width: 820px;
+}
+
+.music-list .music-card {
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  gap: 18px;
+  min-height: 124px;
+  margin-top: 0;
+  padding: 18px 20px;
+  border-radius: 24px;
+}
+
+.music-list .music-card img {
+  width: 88px;
+  height: 88px;
+}
+
+.music-list .music-card h3 {
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  max-width: 560px;
+  padding: 24px;
+  color: var(--muted);
 }
 
 .card {
@@ -740,6 +819,16 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .music-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .music-stats {
+    place-items: start;
+    min-height: auto;
+    text-align: left;
+  }
+
   .archive-item {
     grid-template-columns: 1fr;
   }
@@ -761,6 +850,23 @@ textarea {
   .profile-head,
   .music-card {
     grid-template-columns: 1fr;
+  }
+
+  .music-list .music-card {
+    grid-template-columns: 64px minmax(0, 1fr) 46px;
+    gap: 12px;
+    min-height: 94px;
+    padding: 14px;
+  }
+
+  .music-list .music-card img {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+  }
+
+  .music-list .music-card h3 {
+    font-size: 15px;
   }
 
   .stats {
