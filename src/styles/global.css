@@ -418,15 +418,11 @@ textarea {
   gap: 8px;
 }
 
-.music-card .track-button {
-  display: none;
-}
-
 .track-button {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border: 1px solid var(--line);
   border-radius: 50%;
   color: var(--muted);
@@ -681,6 +677,8 @@ textarea {
 
 .music-list .music-card .track-button {
   display: grid;
+  width: 34px;
+  height: 34px;
 }
 
 .music-list .music-card img {

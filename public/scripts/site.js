@@ -23,7 +23,6 @@
 
   const getSiteAudio = () => document.querySelector("[data-site-audio]");
   const getPlayers = () => [...document.querySelectorAll("[data-audio]")];
-  const getPlayablePlayers = () => getPlayers().filter((player) => normalizeSrc(player.dataset.src || player.querySelector("audio")?.src));
 
   const getPlayerSource = (player) => normalizeSrc(player?.dataset.src || player?.querySelector("audio")?.src || "");
 
@@ -40,6 +39,11 @@
   const findTrackBySource = (source) => {
     const target = normalizeSrc(source);
     return getPlaylist().find((track) => normalizeSrc(track.src) === target);
+  };
+
+  const getPlaylistIndex = (source) => {
+    const target = normalizeSrc(source);
+    return getPlaylist().findIndex((track) => normalizeSrc(track.src) === target);
   };
 
   const isMiniPlayer = (player) => !player.closest(".music-list");
@@ -126,7 +130,7 @@
     const siteAudio = getSiteAudio();
     const activeSrc = normalizeSrc(siteAudio?.currentSrc || siteAudio?.src);
     const isPlaying = Boolean(siteAudio && activeSrc && !siteAudio.paused && !siteAudio.ended);
-    const playable = getPlayablePlayers();
+    const playlist = getPlaylist();
 
     getPlayers().forEach((player) => {
       if (isMiniPlayer(player)) {
@@ -153,8 +157,8 @@
 
       const prev = player.querySelector("[data-prev-track]");
       const next = player.querySelector("[data-next-track]");
-      if (prev) prev.disabled = playable.length <= 1;
-      if (next) next.disabled = playable.length <= 1;
+      if (prev) prev.disabled = playlist.length <= 1;
+      if (next) next.disabled = playlist.length <= 1;
 
       if (isActive) updateLyrics(player, seconds);
       else setLyricLine(player, player.dataset.lyrics ? "等待播放歌词" : "暂无歌词");
@@ -165,14 +169,26 @@
     const source = getPlayerSource(player);
     if (!source) return;
 
-    const siteAudio = getSiteAudio();
-    const audio = siteAudio || player.querySelector("audio");
-    if (!audio) return;
+    const track = findTrackBySource(source) || {
+      title: player.dataset.title,
+      artist: player.dataset.artist,
+      cover: player.dataset.cover,
+      src: player.dataset.src,
+      lyrics: player.dataset.lyrics
+    };
+    await playTrack(track);
+  };
 
-    const current = normalizeSrc(audio.currentSrc || audio.src);
-    if (current !== source) audio.src = source;
-    await audio.play();
-    await updateLyrics(player, audio.currentTime || 0);
+  const playTrack = async (track) => {
+    if (!track?.src) return;
+
+    const siteAudio = getSiteAudio();
+    if (!siteAudio) return;
+
+    const current = normalizeSrc(siteAudio.currentSrc || siteAudio.src);
+    const source = normalizeSrc(track.src);
+    if (current !== source) siteAudio.src = track.src;
+    await siteAudio.play();
     syncAudioButtons();
   };
 
@@ -191,14 +207,16 @@
   };
 
   const playAdjacent = async (player, direction) => {
-    const playable = getPlayablePlayers();
-    if (!playable.length) return;
+    const playlist = getPlaylist();
+    if (!playlist.length) return;
 
     const siteAudio = getSiteAudio();
-    const active = findPlayerBySource(siteAudio?.currentSrc || siteAudio?.src) || player;
-    const index = Math.max(0, playable.indexOf(active));
-    const nextIndex = (index + direction + playable.length) % playable.length;
-    await playPlayer(playable[nextIndex]);
+    const activeSource = normalizeSrc(siteAudio?.currentSrc || siteAudio?.src) || getPlayerSource(player);
+    let index = getPlaylistIndex(activeSource);
+    if (index === -1) index = getPlaylistIndex(getPlayerSource(player));
+    if (index === -1) index = 0;
+    const nextIndex = (index + direction + playlist.length) % playlist.length;
+    await playTrack(playlist[nextIndex]);
   };
 
   const bindThemeToggles = () => {
