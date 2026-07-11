@@ -1,9 +1,5 @@
 (() => {
-  const root = document.documentElement;
-  const savedTheme = localStorage.getItem("theme");
   const lyricCache = new Map();
-
-  if (savedTheme === "dark") root.classList.add("dark");
 
   const normalizeSrc = (src) => {
     if (!src) return "";
@@ -219,17 +215,6 @@
     await playTrack(playlist[nextIndex]);
   };
 
-  const bindThemeToggles = () => {
-    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
-      if (button.dataset.boundTheme) return;
-      button.dataset.boundTheme = "true";
-      button.addEventListener("click", () => {
-        root.classList.toggle("dark");
-        localStorage.setItem("theme", root.classList.contains("dark") ? "dark" : "light");
-      });
-    });
-  };
-
   const bindSearch = () => {
     const searchInput = document.querySelector("[data-search]");
     if (!searchInput || searchInput.dataset.boundSearch) return;
@@ -296,7 +281,6 @@
   };
 
   const initPage = () => {
-    bindThemeToggles();
     bindSearch();
     updateReadingProgress();
     bindAudioCards();
