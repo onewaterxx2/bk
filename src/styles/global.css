@@ -530,9 +530,9 @@ textarea {
 
 .lyrics-panel {
   display: block;
-  min-height: 28px;
+  min-height: 48px;
   margin-top: 8px;
-  padding: 5px 8px;
+  padding: 7px 9px;
   overflow: hidden;
   border: 1px solid rgba(117, 215, 255, 0.14);
   border-radius: 12px;
@@ -544,9 +544,11 @@ textarea {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   overflow: hidden;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   transition: color 180ms ease, transform 180ms ease;
 }
 
@@ -581,14 +583,16 @@ textarea {
 }
 
 .music-list .lyrics-panel {
-  min-height: 38px;
+  min-height: 72px;
   margin-top: 10px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   border-radius: 16px;
 }
 
 .music-list .lyrics-panel p {
   font-size: 13px;
+  line-height: 1.55;
+  -webkit-line-clamp: 3;
 }
 
 .ticker {
