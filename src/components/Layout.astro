@@ -1,10 +1,13 @@
 ---
 import "../styles/global.css";
 import site from "../data/site.json";
+import music from "../data/music.json";
 import { withBase } from "../lib/paths";
+import { ClientRouter } from "astro:transitions";
 
 const { title = site.title, description = site.subtitle } = Astro.props;
 const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`;
+const persistentTrack = music.find((track) => track.src);
 ---
 
 <!doctype html>
@@ -16,8 +19,19 @@ const pageTitle = title === site.title ? site.title : `${title} | ${site.title}`
     <meta name="theme-color" content="#fff8fb" />
     <link rel="icon" href={withBase("images/avatar.svg")} />
     <title>{pageTitle}</title>
+    <ClientRouter />
   </head>
   <body>
+    {
+      persistentTrack?.src && (
+        <audio
+          data-site-audio
+          src={persistentTrack.src}
+          preload="metadata"
+          transition:persist
+        />
+      )
+    }
     <div class="reading-progress" data-reading-progress></div>
     <div class="site-shell">
       <header class="topbar">
