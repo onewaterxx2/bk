@@ -31,11 +31,14 @@ const data = post.data;
         <Content />
       </div>
     </article>
-    <aside class="toc glass">
+    <aside class="toc glass" data-toc>
       <strong>目录</strong>
-      {headings.filter((heading) => heading.depth <= 3).map((heading) => (
-        <a href={`#${heading.slug}`}>{heading.text}</a>
-      ))}
+      <nav data-toc-list>
+        {headings.filter((heading) => heading.depth > 1 && heading.depth <= 3).map((heading) => (
+          <a href={`#${heading.slug}`} data-depth={heading.depth}>{heading.text}</a>
+        ))}
+      </nav>
+      <p data-toc-empty hidden>这篇文章暂无小标题</p>
     </aside>
   </main>
 </Layout>

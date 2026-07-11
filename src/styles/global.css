@@ -966,6 +966,21 @@ textarea {
   font-size: 14px;
 }
 
+.toc a[data-depth="3"] {
+  padding-left: 12px;
+  font-size: 13px;
+}
+
+.toc a:hover {
+  color: var(--ink);
+}
+
+.toc p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .friend-card {
   display: grid;
   grid-template-columns: 58px 1fr;

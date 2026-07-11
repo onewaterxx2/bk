@@ -229,6 +229,58 @@
     });
   };
 
+  const slugifyHeading = (text, index) => {
+    const slug = String(text || "")
+      .trim()
+      .toLowerCase()
+      .replace(/<[^>]+>/g, "")
+      .replace(/[^\p{Letter}\p{Number}\s-]/gu, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+    return slug || `section-${index + 1}`;
+  };
+
+  const buildArticleToc = () => {
+    const toc = document.querySelector("[data-toc]");
+    const list = toc?.querySelector("[data-toc-list]");
+    const empty = toc?.querySelector("[data-toc-empty]");
+    const article = document.querySelector(".article .prose");
+    if (!toc || !list || !article) return;
+
+    const headings = [...article.querySelectorAll("h2, h3")].filter((heading) => heading.textContent.trim());
+    const hasServerLinks = list.querySelectorAll("a").length > 0;
+
+    if (!hasServerLinks) {
+      const used = new Set();
+      list.innerHTML = "";
+      headings.forEach((heading, index) => {
+        if (!heading.id) {
+          let slug = slugifyHeading(heading.textContent, index);
+          const base = slug;
+          let count = 2;
+          while (used.has(slug) || document.getElementById(slug)) {
+            slug = `${base}-${count}`;
+            count += 1;
+          }
+          heading.id = slug;
+        }
+        used.add(heading.id);
+
+        const link = document.createElement("a");
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent.trim();
+        link.dataset.depth = heading.tagName === "H3" ? "3" : "2";
+        list.append(link);
+      });
+    }
+
+    const hasLinks = list.querySelectorAll("a").length > 0;
+    toc.hidden = false;
+    if (empty) empty.hidden = hasLinks;
+    list.hidden = !hasLinks;
+  };
+
   const updateReadingProgress = () => {
     const progress = document.querySelector("[data-reading-progress]");
     if (!progress) return;
@@ -282,6 +334,7 @@
 
   const initPage = () => {
     bindSearch();
+    buildArticleToc();
     updateReadingProgress();
     bindAudioCards();
   };
