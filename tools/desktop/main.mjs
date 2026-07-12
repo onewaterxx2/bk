@@ -41,6 +41,7 @@ const candidateRoots = () => {
     process.cwd(),
     exeDir,
     resolve(exeDir, ".."),
+    resolve(exeDir, "../.."),
     devRoot
   ].filter(Boolean);
 };
