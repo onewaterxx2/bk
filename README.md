@@ -146,6 +146,30 @@ git push
 
 推送成功后，GitHub Actions 会自动构建网站，并发布到 GitHub Pages。
 
+## 桌面版管理工具
+
+本地管理工具也可以打包成 Windows 桌面软件。桌面版启动后会自动打开管理界面，不需要手动运行命令和输入地址。
+
+开发模式启动桌面版：
+
+```bash
+npm run admin:desktop
+```
+
+打包 Windows 免安装目录版：
+
+```bash
+npm run admin:pack
+```
+
+打包完成后运行：
+
+```text
+release/win-unpacked/江水博客管理工具.exe
+```
+
+如果想要方便移动，可以把 `release/win-unpacked/` 压缩成 zip。首次启动时，如果软件没有自动找到博客仓库目录，会提示你选择包含 `src`、`public`、`tools` 文件夹的目录。
+
 ## 写文章
 
 文章文件位于：
@@ -328,6 +352,8 @@ npm run dev       # 本地开发
 npm run build     # 构建静态网站
 npm run preview   # 预览构建结果
 npm run admin     # 启动本地管理工具
+npm run admin:desktop # 启动桌面版管理工具
+npm run admin:pack    # 打包 Windows 免安装目录版
 ```
 
 ## 常见问题

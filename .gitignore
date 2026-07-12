@@ -6,6 +6,8 @@ dist/
 .env
 .env.*
 .npm-cache/
+.electron-builder-cache/
+release/
 模版.png
 npm-debug.log*
 *.log

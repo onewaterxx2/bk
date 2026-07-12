@@ -10,10 +10,11 @@ import {
   writeFileSync
 } from "node:fs";
 import { extname, join, normalize, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
-const adminPublic = join(root, "tools/admin/public");
+const defaultRoot = resolve(fileURLToPath(new URL("../../", import.meta.url)));
+const root = resolve(process.env.BLOG_ADMIN_ROOT || defaultRoot);
+const adminPublic = resolve(process.env.BLOG_ADMIN_PUBLIC || join(root, "tools/admin/public"));
 const port = Number(process.env.BLOG_ADMIN_PORT || 4587);
 
 const safeJoin = (...parts) => {
@@ -351,7 +352,7 @@ const routes = {
   }
 };
 
-createServer(async (req, res) => {
+const createAdminRequestHandler = () => async (req, res) => {
   try {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
     const key = `${req.method} ${url.pathname}`;
@@ -375,6 +376,37 @@ createServer(async (req, res) => {
   } catch (error) {
     json(res, 500, { ok: false, error: error instanceof Error ? error.message : String(error) });
   }
-}).listen(port, "127.0.0.1", () => {
-  console.log(`Blog admin: http://127.0.0.1:${port}`);
-});
+};
+
+export const startAdminServer = ({ host = "127.0.0.1", port: listenPort = port } = {}) => {
+  const server = createServer(createAdminRequestHandler());
+  return new Promise((resolvePromise, reject) => {
+    server.once("error", reject);
+    server.listen(listenPort, host, () => {
+      server.off("error", reject);
+      const address = server.address();
+      const actualPort = typeof address === "object" && address ? address.port : listenPort;
+      resolvePromise({
+        server,
+        host,
+        port: actualPort,
+        url: `http://${host}:${actualPort}`,
+        root,
+        adminPublic
+      });
+    });
+  });
+};
+
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectRun) {
+  startAdminServer()
+    .then(({ url }) => {
+      console.log(`Blog admin: ${url}`);
+    })
+    .catch((error) => {
+      console.error(error);
+      process.exitCode = 1;
+    });
+}

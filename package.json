@@ -1,13 +1,19 @@
 {
   "name": "jiangshui-blog",
   "version": "0.1.0",
+  "description": "江水博客和本地桌面管理工具",
+  "author": "onewaterxx2",
   "private": true,
   "type": "module",
+  "main": "tools/desktop/main.mjs",
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro check && astro build",
     "preview": "astro preview --host 127.0.0.1",
-    "admin": "node tools/admin/server.mjs"
+    "admin": "node tools/admin/server.mjs",
+    "admin:desktop": "electron tools/desktop/main.mjs",
+    "admin:pack": "electron-builder --dir",
+    "admin:portable": "electron-builder --win portable"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -19,5 +25,26 @@
     "three": "^0.185.1",
     "typescript": "^5.6.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.jiangshui.blog.admin",
+    "productName": "江水博客管理工具",
+    "asar": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "tools/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "artifactName": "${productName}-${version}.${ext}"
+    }
+  }
 }
